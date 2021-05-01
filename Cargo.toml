@@ -1,0 +1,46 @@
+[package]
+name = "sdfat-rs"
+version = "0.1.0"
+authors = ["David Morrison <drmorr@evokewonder.com>"]
+edition = "2018"
+
+[features]
+atmega328p = ["atmega-hal/atmega328p"]
+
+[dependencies]
+embedded-hal = "0.2.5"
+nb = "1.0.0"
+ufmt = "0.1.0"
+
+[dependencies.atmega-hal]
+git = "https://github.com/Rahix/avr-hal"
+branch = "next"
+
+[dependencies.avr-hal-generic]
+git = "https://github.com/Rahix/avr-hal"
+branch = "next"
+
+[dependencies.void]
+version = "1"
+default-features = false
+
+[dev-dependencies.arduino-hal]
+git = "https://github.com/Rahix/avr-hal"
+branch = "next"
+features = ["arduino-uno"]
+
+[examples]
+name = "simple"
+
+# Configure the build for minimal size
+[profile.dev]
+panic = "abort"
+lto = true
+opt-level = "s"
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+debug = true
+lto = true
+opt-level = "s"

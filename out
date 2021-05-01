@@ -1,0 +1,1491 @@
+
+target/avr-atmega328p/release/examples/simple.elf:     file format elf32-avr
+
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 34 00 	jmp	0x68	; 0x68 <__ctors_end>
+   4:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+   8:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+   c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  10:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  14:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  18:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  1c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  20:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  24:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  28:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  2c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  30:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  34:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  38:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  3c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  40:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  44:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  48:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  4c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  50:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  54:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  58:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  5c:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  60:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+  64:	0c 94 51 00 	jmp	0xa2	; 0xa2 <__bad_interrupt>
+
+00000068 <__ctors_end>:
+  68:	11 24       	eor	r1, r1
+  6a:	1f be       	out	0x3f, r1	; 63
+  6c:	cf ef       	ldi	r28, 0xFF	; 255
+  6e:	d8 e0       	ldi	r29, 0x08	; 8
+  70:	de bf       	out	0x3e, r29	; 62
+  72:	cd bf       	out	0x3d, r28	; 61
+
+00000074 <__do_copy_data>:
+  74:	11 e0       	ldi	r17, 0x01	; 1
+  76:	a0 e0       	ldi	r26, 0x00	; 0
+  78:	b1 e0       	ldi	r27, 0x01	; 1
+  7a:	e0 ee       	ldi	r30, 0xE0	; 224
+  7c:	f6 e0       	ldi	r31, 0x06	; 6
+  7e:	02 c0       	rjmp	.+4      	; 0x84 <__do_copy_data+0x10>
+  80:	05 90       	lpm	r0, Z+
+  82:	0d 92       	st	X+, r0
+  84:	aa 37       	cpi	r26, 0x7A	; 122
+  86:	b1 07       	cpc	r27, r17
+  88:	d9 f7       	brne	.-10     	; 0x80 <__do_copy_data+0xc>
+
+0000008a <__do_clear_bss>:
+  8a:	21 e0       	ldi	r18, 0x01	; 1
+  8c:	aa e7       	ldi	r26, 0x7A	; 122
+  8e:	b1 e0       	ldi	r27, 0x01	; 1
+  90:	01 c0       	rjmp	.+2      	; 0x94 <.do_clear_bss_start>
+
+00000092 <.do_clear_bss_loop>:
+  92:	1d 92       	st	X+, r1
+
+00000094 <.do_clear_bss_start>:
+  94:	ab 37       	cpi	r26, 0x7B	; 123
+  96:	b2 07       	cpc	r27, r18
+  98:	e1 f7       	brne	.-8      	; 0x92 <.do_clear_bss_loop>
+  9a:	0e 94 c4 01 	call	0x388	; 0x388 <main>
+  9e:	0c 94 57 03 	jmp	0x6ae	; 0x6ae <exit>
+
+000000a2 <__bad_interrupt>:
+  a2:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+000000a6 <_ZN49_$LT$W$u20$as$u20$ufmt..UnstableDoAsFormatter$GT$15do_as_formatter17hb92733a67da40f7fE>:
+where
+    W: uWrite + ?Sized,
+{
+    type Writer = W;
+
+    fn do_as_formatter(
+  a6:	ac e4       	ldi	r26, 0x4C	; 76
+  a8:	b1 e0       	ldi	r27, 0x01	; 1
+  aa:	81 e6       	ldi	r24, 0x61	; 97
+  ac:	91 e0       	ldi	r25, 0x01	; 1
+impl<H, USART: UsartOps<H, RX, TX>, RX, TX, CLOCK> ufmt::uWrite for Usart<H, USART, RX, TX, CLOCK> {
+    type Error = void::Void;
+
+    fn write_str(&mut self, s: &str) -> Result<(), Self::Error> {
+        for b in s.as_bytes().iter() {
+            self.write_byte(*b);
+  ae:	2c 91       	ld	r18, X
+    if cfg!(debug_assertions) && !is_aligned_and_not_null(src) {
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_load`.
+    unsafe { intrinsics::volatile_load(src) }
+  b0:	30 91 c0 00 	lds	r19, 0x00C0	; 0x8000c0 <__DATA_REGION_ORIGIN__+0x60>
+        FE0_R::new(((self.bits >> 4) & 0x01) != 0)
+    }
+    #[doc = "Bit 5 - USART Data Register Empty"]
+    #[inline(always)]
+    pub fn udre0(&self) -> UDRE0_R {
+        UDRE0_R::new(((self.bits >> 5) & 0x01) != 0)
+  b4:	30 72       	andi	r19, 0x20	; 32
+                    }
+                }
+
+                fn raw_write(&mut self, byte: u8) -> $crate::nb::Result<(), $crate::void::Void> {
+                    // Call flush to make sure the data-register is empty
+                    self.raw_flush()?;
+  b6:	30 30       	cpi	r19, 0x00	; 0
+  b8:	d9 f3       	breq	.-10     	; 0xb0 <_ZN49_$LT$W$u20$as$u20$ufmt..UnstableDoAsFormatter$GT$15do_as_formatter17hb92733a67da40f7fE+0xa>
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_store`.
+    unsafe {
+        intrinsics::volatile_store(dst, src);
+  ba:	20 93 c6 00 	sts	0x00C6, r18	; 0x8000c6 <__DATA_REGION_ORIGIN__+0x66>
+        T: Sized,
+    {
+        // SAFETY: the caller must uphold the safety contract for `offset`.
+        // The obtained pointer is valid for writes since the caller must
+        // guarantee that it points to the same allocated object as `self`.
+        unsafe { intrinsics::offset(self, count) as *mut T }
+  be:	11 96       	adiw	r26, 0x01	; 1
+                unsafe {
+                    assume(!self.ptr.as_ptr().is_null());
+                    if mem::size_of::<T>() != 0 {
+                        assume(!self.end.is_null());
+                    }
+                    if is_empty!(self) {
+  c0:	a8 17       	cp	r26, r24
+  c2:	b9 07       	cpc	r27, r25
+  c4:	a1 f7       	brne	.-24     	; 0xae <_ZN49_$LT$W$u20$as$u20$ufmt..UnstableDoAsFormatter$GT$15do_as_formatter17hb92733a67da40f7fE+0x8>
+        &mut self,
+        f: impl FnOnce(&mut Formatter<'_, W>) -> Result<(), W::Error>,
+    ) -> Result<(), W::Error> {
+        f(&mut Formatter::new(self))
+    }
+  c6:	08 95       	ret
+
+000000c8 <_ZN4ufmt18Formatter$LT$W$GT$9write_str17h8cd037506547acaeE>:
+    pub fn write_char(&mut self, c: char) -> Result<(), W::Error> {
+        self.writer.write_char(c)
+    }
+
+    /// Writes a string slice to the underlying buffer contained within this formatter.
+    pub fn write_str(&mut self, s: &str) -> Result<(), W::Error> {
+  c8:	dc 01       	movw	r26, r24
+  ca:	80 e0       	ldi	r24, 0x00	; 0
+  cc:	90 e0       	ldi	r25, 0x00	; 0
+  ce:	68 17       	cp	r22, r24
+  d0:	79 07       	cpc	r23, r25
+  d2:	71 f0       	breq	.+28     	; 0xf0 <_ZN4ufmt18Formatter$LT$W$GT$9write_str17h8cd037506547acaeE+0x28>
+  d4:	6a 0f       	add	r22, r26
+  d6:	7b 1f       	adc	r23, r27
+impl<H, USART: UsartOps<H, RX, TX>, RX, TX, CLOCK> ufmt::uWrite for Usart<H, USART, RX, TX, CLOCK> {
+    type Error = void::Void;
+
+    fn write_str(&mut self, s: &str) -> Result<(), Self::Error> {
+        for b in s.as_bytes().iter() {
+            self.write_byte(*b);
+  d8:	8c 91       	ld	r24, X
+    if cfg!(debug_assertions) && !is_aligned_and_not_null(src) {
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_load`.
+    unsafe { intrinsics::volatile_load(src) }
+  da:	90 91 c0 00 	lds	r25, 0x00C0	; 0x8000c0 <__DATA_REGION_ORIGIN__+0x60>
+  de:	90 72       	andi	r25, 0x20	; 32
+                    }
+                }
+
+                fn raw_write(&mut self, byte: u8) -> $crate::nb::Result<(), $crate::void::Void> {
+                    // Call flush to make sure the data-register is empty
+                    self.raw_flush()?;
+  e0:	90 30       	cpi	r25, 0x00	; 0
+  e2:	d9 f3       	breq	.-10     	; 0xda <_ZN4ufmt18Formatter$LT$W$GT$9write_str17h8cd037506547acaeE+0x12>
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_store`.
+    unsafe {
+        intrinsics::volatile_store(dst, src);
+  e4:	80 93 c6 00 	sts	0x00C6, r24	; 0x8000c6 <__DATA_REGION_ORIGIN__+0x66>
+  e8:	11 96       	adiw	r26, 0x01	; 1
+  ea:	a6 17       	cp	r26, r22
+  ec:	b7 07       	cpc	r27, r23
+  ee:	a1 f7       	brne	.-24     	; 0xd8 <_ZN4ufmt18Formatter$LT$W$GT$9write_str17h8cd037506547acaeE+0x10>
+        self.writer.write_str(s)
+    }
+  f0:	08 95       	ret
+
+000000f2 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E>:
+        uwriteln!(serial, "The card responded {}", status);
+
+        sdcard
+    }
+
+    fn send_card_command(
+  f2:	3f 92       	push	r3
+  f4:	4f 92       	push	r4
+  f6:	5f 92       	push	r5
+  f8:	6f 92       	push	r6
+  fa:	7f 92       	push	r7
+  fc:	8f 92       	push	r8
+  fe:	9f 92       	push	r9
+ 100:	af 92       	push	r10
+ 102:	bf 92       	push	r11
+ 104:	cf 92       	push	r12
+ 106:	df 92       	push	r13
+ 108:	ef 92       	push	r14
+ 10a:	ff 92       	push	r15
+ 10c:	0f 93       	push	r16
+ 10e:	1f 93       	push	r17
+ 110:	cf 93       	push	r28
+ 112:	df 93       	push	r29
+ 114:	cd b7       	in	r28, 0x3d	; 61
+ 116:	de b7       	in	r29, 0x3e	; 62
+ 118:	29 97       	sbiw	r28, 0x09	; 9
+ 11a:	0f b6       	in	r0, 0x3f	; 63
+ 11c:	f8 94       	cli
+ 11e:	de bf       	out	0x3e, r29	; 62
+ 120:	0f be       	out	0x3f, r0	; 63
+ 122:	cd bf       	out	0x3d, r28	; 61
+ 124:	dc 01       	movw	r26, r24
+ 126:	2a 98       	cbi	0x05, 2	; 5
+ 128:	8c 91       	ld	r24, X
+ 12a:	60 64       	ori	r22, 0x40	; 64
+        self.p.raw_release();
+        (self.p, self.sclk, self.mosi, self.miso, cs.0)
+    }
+
+    fn flush(&mut self) -> nb::Result<(), void::Void> {
+        if self.write_in_progress {
+ 12c:	80 30       	cpi	r24, 0x00	; 0
+ 12e:	29 f0       	breq	.+10     	; 0x13a <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x48>
+    if cfg!(debug_assertions) && !is_aligned_and_not_null(src) {
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_load`.
+    unsafe { intrinsics::volatile_load(src) }
+ 130:	9d b5       	in	r25, 0x2d	; 45
+            if self.p.raw_check_iflag() {
+ 132:	99 23       	and	r25, r25
+ 134:	da f7       	brpl	.-10     	; 0x12c <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x3a>
+ 136:	80 e0       	ldi	r24, 0x00	; 0
+                self.write_in_progress = false;
+ 138:	8c 93       	st	X, r24
+ 13a:	81 e0       	ldi	r24, 0x01	; 1
+        }
+        Ok(())
+    }
+
+    fn write(&mut self, byte: u8) {
+        self.write_in_progress = true;
+ 13c:	8c 93       	st	X, r24
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_store`.
+    unsafe {
+        intrinsics::volatile_store(dst, src);
+ 13e:	6e bd       	out	0x2e, r22	; 46
+ 140:	8c 91       	ld	r24, X
+        self.p.raw_release();
+        (self.p, self.sclk, self.mosi, self.miso, cs.0)
+    }
+
+    fn flush(&mut self) -> nb::Result<(), void::Void> {
+        if self.write_in_progress {
+ 142:	80 30       	cpi	r24, 0x00	; 0
+ 144:	29 f0       	breq	.+10     	; 0x150 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x5e>
+    if cfg!(debug_assertions) && !is_aligned_and_not_null(src) {
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_load`.
+    unsafe { intrinsics::volatile_load(src) }
+ 146:	9d b5       	in	r25, 0x2d	; 45
+            if self.p.raw_check_iflag() {
+ 148:	99 23       	and	r25, r25
+ 14a:	da f7       	brpl	.-10     	; 0x142 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x50>
+ 14c:	80 e0       	ldi	r24, 0x00	; 0
+                self.write_in_progress = false;
+ 14e:	8c 93       	st	X, r24
+ 150:	81 e0       	ldi	r24, 0x01	; 1
+        }
+        Ok(())
+    }
+
+    fn write(&mut self, byte: u8) {
+        self.write_in_progress = true;
+ 152:	8c 93       	st	X, r24
+ 154:	80 e0       	ldi	r24, 0x00	; 0
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_store`.
+    unsafe {
+        intrinsics::volatile_store(dst, src);
+ 156:	8e bd       	out	0x2e, r24	; 46
+ 158:	8c 91       	ld	r24, X
+        self.p.raw_release();
+        (self.p, self.sclk, self.mosi, self.miso, cs.0)
+    }
+
+    fn flush(&mut self) -> nb::Result<(), void::Void> {
+        if self.write_in_progress {
+ 15a:	80 30       	cpi	r24, 0x00	; 0
+ 15c:	29 f0       	breq	.+10     	; 0x168 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x76>
+    if cfg!(debug_assertions) && !is_aligned_and_not_null(src) {
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_load`.
+    unsafe { intrinsics::volatile_load(src) }
+ 15e:	9d b5       	in	r25, 0x2d	; 45
+            if self.p.raw_check_iflag() {
+ 160:	99 23       	and	r25, r25
+ 162:	da f7       	brpl	.-10     	; 0x15a <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x68>
+ 164:	80 e0       	ldi	r24, 0x00	; 0
+                self.write_in_progress = false;
+ 166:	8c 93       	st	X, r24
+ 168:	81 e0       	ldi	r24, 0x01	; 1
+        }
+        Ok(())
+    }
+
+    fn write(&mut self, byte: u8) {
+        self.write_in_progress = true;
+ 16a:	8c 93       	st	X, r24
+ 16c:	80 e0       	ldi	r24, 0x00	; 0
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_store`.
+    unsafe {
+        intrinsics::volatile_store(dst, src);
+ 16e:	8e bd       	out	0x2e, r24	; 46
+ 170:	8c 91       	ld	r24, X
+        self.p.raw_release();
+        (self.p, self.sclk, self.mosi, self.miso, cs.0)
+    }
+
+    fn flush(&mut self) -> nb::Result<(), void::Void> {
+        if self.write_in_progress {
+ 172:	80 30       	cpi	r24, 0x00	; 0
+ 174:	29 f0       	breq	.+10     	; 0x180 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x8e>
+    if cfg!(debug_assertions) && !is_aligned_and_not_null(src) {
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_load`.
+    unsafe { intrinsics::volatile_load(src) }
+ 176:	9d b5       	in	r25, 0x2d	; 45
+            if self.p.raw_check_iflag() {
+ 178:	99 23       	and	r25, r25
+ 17a:	da f7       	brpl	.-10     	; 0x172 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x80>
+ 17c:	80 e0       	ldi	r24, 0x00	; 0
+                self.write_in_progress = false;
+ 17e:	8c 93       	st	X, r24
+ 180:	81 e0       	ldi	r24, 0x01	; 1
+        }
+        Ok(())
+    }
+
+    fn write(&mut self, byte: u8) {
+        self.write_in_progress = true;
+ 182:	8c 93       	st	X, r24
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_store`.
+    unsafe {
+        intrinsics::volatile_store(dst, src);
+ 184:	3e bd       	out	0x2e, r19	; 46
+ 186:	8c 91       	ld	r24, X
+        self.p.raw_release();
+        (self.p, self.sclk, self.mosi, self.miso, cs.0)
+    }
+
+    fn flush(&mut self) -> nb::Result<(), void::Void> {
+        if self.write_in_progress {
+ 188:	80 30       	cpi	r24, 0x00	; 0
+ 18a:	29 f0       	breq	.+10     	; 0x196 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0xa4>
+    if cfg!(debug_assertions) && !is_aligned_and_not_null(src) {
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_load`.
+    unsafe { intrinsics::volatile_load(src) }
+ 18c:	9d b5       	in	r25, 0x2d	; 45
+            if self.p.raw_check_iflag() {
+ 18e:	99 23       	and	r25, r25
+ 190:	da f7       	brpl	.-10     	; 0x188 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x96>
+ 192:	80 e0       	ldi	r24, 0x00	; 0
+                self.write_in_progress = false;
+ 194:	8c 93       	st	X, r24
+ 196:	81 e0       	ldi	r24, 0x01	; 1
+        }
+        Ok(())
+    }
+
+    fn write(&mut self, byte: u8) {
+        self.write_in_progress = true;
+ 198:	8c 93       	st	X, r24
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_store`.
+    unsafe {
+        intrinsics::volatile_store(dst, src);
+ 19a:	2e bd       	out	0x2e, r18	; 46
+ 19c:	8c 91       	ld	r24, X
+        self.p.raw_release();
+        (self.p, self.sclk, self.mosi, self.miso, cs.0)
+    }
+
+    fn flush(&mut self) -> nb::Result<(), void::Void> {
+        if self.write_in_progress {
+ 19e:	80 30       	cpi	r24, 0x00	; 0
+ 1a0:	29 f0       	breq	.+10     	; 0x1ac <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0xba>
+    if cfg!(debug_assertions) && !is_aligned_and_not_null(src) {
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_load`.
+    unsafe { intrinsics::volatile_load(src) }
+ 1a2:	9d b5       	in	r25, 0x2d	; 45
+            if self.p.raw_check_iflag() {
+ 1a4:	99 23       	and	r25, r25
+ 1a6:	da f7       	brpl	.-10     	; 0x19e <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0xac>
+ 1a8:	80 e0       	ldi	r24, 0x00	; 0
+                self.write_in_progress = false;
+ 1aa:	8c 93       	st	X, r24
+ 1ac:	81 e0       	ldi	r24, 0x01	; 1
+        }
+        Ok(())
+    }
+
+    fn write(&mut self, byte: u8) {
+        self.write_in_progress = true;
+ 1ae:	8c 93       	st	X, r24
+ 1b0:	85 e9       	ldi	r24, 0x95	; 149
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_store`.
+    unsafe {
+        intrinsics::volatile_store(dst, src);
+ 1b2:	8e bd       	out	0x2e, r24	; 46
+ 1b4:	2a 9a       	sbi	0x05, 2	; 5
+ 1b6:	9e 01       	movw	r18, r28
+ 1b8:	29 5f       	subi	r18, 0xF9	; 249
+ 1ba:	3f 4f       	sbci	r19, 0xFF	; 255
+ 1bc:	c9 01       	movw	r24, r18
+ 1be:	02 96       	adiw	r24, 0x02	; 2
+ 1c0:	8b 83       	std	Y+3, r24	; 0x03
+ 1c2:	9c 83       	std	Y+4, r25	; 0x04
+ 1c4:	80 e0       	ldi	r24, 0x00	; 0
+ 1c6:	90 e0       	ldi	r25, 0x00	; 0
+ 1c8:	0a e0       	ldi	r16, 0x0A	; 10
+ 1ca:	10 e0       	ldi	r17, 0x00	; 0
+ 1cc:	4e e3       	ldi	r20, 0x3E	; 62
+ 1ce:	51 e0       	ldi	r21, 0x01	; 1
+ 1d0:	6a e0       	ldi	r22, 0x0A	; 10
+ 1d2:	e4 e6       	ldi	r30, 0x64	; 100
+ 1d4:	f0 e0       	ldi	r31, 0x00	; 0
+ 1d6:	8d 83       	std	Y+5, r24	; 0x05
+ 1d8:	9e 83       	std	Y+6, r25	; 0x06
+ 1da:	5c 01       	movw	r10, r24
+ 1dc:	a9 83       	std	Y+1, r26	; 0x01
+ 1de:	ba 83       	std	Y+2, r27	; 0x02
+                #[inline]
+                fn partial_cmp(&self, other: &$t) -> Option<Ordering> {
+                    Some(self.cmp(other))
+                }
+                #[inline]
+                fn lt(&self, other: &$t) -> bool { (*self) < (*other) }
+ 1e0:	8d 81       	ldd	r24, Y+5	; 0x05
+ 1e2:	9e 81       	ldd	r25, Y+6	; 0x06
+ 1e4:	80 17       	cp	r24, r16
+ 1e6:	91 07       	cpc	r25, r17
+ 1e8:	80 e0       	ldi	r24, 0x00	; 0
+ 1ea:	90 e0       	ldi	r25, 0x00	; 0
+ 1ec:	75 01       	movw	r14, r10
+ 1ee:	e8 06       	cpc	r14, r24
+ 1f0:	f9 06       	cpc	r15, r25
+ 1f2:	81 e0       	ldi	r24, 0x01	; 1
+ 1f4:	08 f4       	brcc	.+2      	; 0x1f8 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x106>
+ 1f6:	80 e0       	ldi	r24, 0x00	; 0
+ 1f8:	81 70       	andi	r24, 0x01	; 1
+impl<A: Step> Iterator for ops::Range<A> {
+    type Item = A;
+
+    #[inline]
+    fn next(&mut self) -> Option<A> {
+        if self.start < self.end {
+ 1fa:	80 30       	cpi	r24, 0x00	; 0
+ 1fc:	09 f0       	breq	.+2      	; 0x200 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x10e>
+ 1fe:	6f c0       	rjmp	.+222    	; 0x2de <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x1ec>
+ 200:	8c 91       	ld	r24, X
+        self.p.raw_release();
+        (self.p, self.sclk, self.mosi, self.miso, cs.0)
+    }
+
+    fn flush(&mut self) -> nb::Result<(), void::Void> {
+        if self.write_in_progress {
+ 202:	80 30       	cpi	r24, 0x00	; 0
+ 204:	29 f0       	breq	.+10     	; 0x210 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x11e>
+    if cfg!(debug_assertions) && !is_aligned_and_not_null(src) {
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_load`.
+    unsafe { intrinsics::volatile_load(src) }
+ 206:	9d b5       	in	r25, 0x2d	; 45
+            if self.p.raw_check_iflag() {
+ 208:	99 23       	and	r25, r25
+ 20a:	da f7       	brpl	.-10     	; 0x202 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x110>
+ 20c:	80 e0       	ldi	r24, 0x00	; 0
+                self.write_in_progress = false;
+ 20e:	8c 93       	st	X, r24
+ 210:	7e b5       	in	r23, 0x2e	; 46
+ 212:	ab e2       	ldi	r26, 0x2B	; 43
+ 214:	b1 e0       	ldi	r27, 0x01	; 1
+impl<H, USART: UsartOps<H, RX, TX>, RX, TX, CLOCK> ufmt::uWrite for Usart<H, USART, RX, TX, CLOCK> {
+    type Error = void::Void;
+
+    fn write_str(&mut self, s: &str) -> Result<(), Self::Error> {
+        for b in s.as_bytes().iter() {
+            self.write_byte(*b);
+ 216:	8c 91       	ld	r24, X
+ 218:	90 91 c0 00 	lds	r25, 0x00C0	; 0x8000c0 <__DATA_REGION_ORIGIN__+0x60>
+ 21c:	90 72       	andi	r25, 0x20	; 32
+                    }
+                }
+
+                fn raw_write(&mut self, byte: u8) -> $crate::nb::Result<(), $crate::void::Void> {
+                    // Call flush to make sure the data-register is empty
+                    self.raw_flush()?;
+ 21e:	90 30       	cpi	r25, 0x00	; 0
+ 220:	d9 f3       	breq	.-10     	; 0x218 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x126>
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_store`.
+    unsafe {
+        intrinsics::volatile_store(dst, src);
+ 222:	80 93 c6 00 	sts	0x00C6, r24	; 0x8000c6 <__DATA_REGION_ORIGIN__+0x66>
+ 226:	11 96       	adiw	r26, 0x01	; 1
+ 228:	a4 17       	cp	r26, r20
+ 22a:	b5 07       	cpc	r27, r21
+ 22c:	a1 f7       	brne	.-24     	; 0x216 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x124>
+ 22e:	8d ec       	ldi	r24, 0xCD	; 205
+        unsafe { str::from_utf8_unchecked($buf.get(i..).unwrap_or_else(|| assume_unreachable!())) }
+    }};
+}
+
+fn usize(n: usize, buf: &mut [u8]) -> &str {
+    uxx!(n, buf)
+ 230:	78 9f       	mul	r23, r24
+ 232:	81 2d       	mov	r24, r1
+ 234:	11 24       	eor	r1, r1
+ 236:	86 95       	lsr	r24
+ 238:	86 95       	lsr	r24
+ 23a:	86 95       	lsr	r24
+ 23c:	86 02       	muls	r24, r22
+ 23e:	11 24       	eor	r1, r1
+ 240:	87 2f       	mov	r24, r23
+ 242:	80 19       	sub	r24, r0
+ 244:	80 63       	ori	r24, 0x30	; 48
+ 246:	ab 81       	ldd	r26, Y+3	; 0x03
+ 248:	bc 81       	ldd	r27, Y+4	; 0x04
+ 24a:	8c 93       	st	X, r24
+                      without modifying the original"]
+        #[inline]
+        pub unsafe fn unchecked_add(self, rhs: Self) -> Self {
+            // SAFETY: the caller must uphold the safety contract for
+            // `unchecked_add`.
+            unsafe { intrinsics::unchecked_add(self, rhs) }
+ 24c:	8d 81       	ldd	r24, Y+5	; 0x05
+ 24e:	9e 81       	ldd	r25, Y+6	; 0x06
+ 250:	8f 5f       	subi	r24, 0xFF	; 255
+ 252:	9f 4f       	sbci	r25, 0xFF	; 255
+ 254:	8d 83       	std	Y+5, r24	; 0x05
+ 256:	9e 83       	std	Y+6, r25	; 0x06
+ 258:	c5 01       	movw	r24, r10
+ 25a:	8f 4f       	sbci	r24, 0xFF	; 255
+ 25c:	9f 4f       	sbci	r25, 0xFF	; 255
+ 25e:	5c 01       	movw	r10, r24
+ 260:	37 2e       	mov	r3, r23
+ 262:	7a 30       	cpi	r23, 0x0A	; 10
+ 264:	82 e0       	ldi	r24, 0x02	; 2
+ 266:	90 e0       	ldi	r25, 0x00	; 0
+ 268:	49 01       	movw	r8, r18
+ 26a:	2f 01       	movw	r4, r30
+ 26c:	fc 01       	movw	r30, r24
+ 26e:	d8 f0       	brcs	.+54     	; 0x2a6 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x1b4>
+ 270:	83 2d       	mov	r24, r3
+        #[$attr]
+        #[doc = $doc]
+        impl From<$Small> for $Large {
+            #[inline]
+            fn from(small: $Small) -> Self {
+                small as Self
+ 272:	e8 2e       	mov	r14, r24
+ 274:	ff 24       	eor	r15, r15
+ 276:	82 e0       	ldi	r24, 0x02	; 2
+ 278:	90 e0       	ldi	r25, 0x00	; 0
+ 27a:	fc 01       	movw	r30, r24
+ 27c:	c7 01       	movw	r24, r14
+ 27e:	b8 01       	movw	r22, r16
+ 280:	3f 01       	movw	r6, r30
+ 282:	0e 94 5a 03 	call	0x6b4	; 0x6b4 <__udivmodhi4>
+ 286:	6b 01       	movw	r12, r22
+ 288:	c6 01       	movw	r24, r12
+ 28a:	b8 01       	movw	r22, r16
+ 28c:	0e 94 5a 03 	call	0x6b4	; 0x6b4 <__udivmodhi4>
+ 290:	f3 01       	movw	r30, r6
+ 292:	31 97       	sbiw	r30, 0x01	; 1
+ 294:	d4 01       	movw	r26, r8
+ 296:	ae 0f       	add	r26, r30
+ 298:	bf 1f       	adc	r27, r31
+ 29a:	80 63       	ori	r24, 0x30	; 48
+ 29c:	8c 93       	st	X, r24
+ 29e:	e4 14       	cp	r14, r4
+ 2a0:	f5 04       	cpc	r15, r5
+ 2a2:	76 01       	movw	r14, r12
+ 2a4:	58 f7       	brcc	.-42     	; 0x27c <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x18a>
+unsafe impl<T> SliceIndex<[T]> for ops::Range<usize> {
+    type Output = [T];
+
+    #[inline]
+    fn get(self, slice: &[T]) -> Option<&[T]> {
+        if self.start > self.end || self.end > slice.len() {
+ 2a6:	83 e0       	ldi	r24, 0x03	; 3
+ 2a8:	90 e0       	ldi	r25, 0x00	; 0
+ 2aa:	e8 27       	eor	r30, r24
+ 2ac:	f9 27       	eor	r31, r25
+    where
+        W: uWrite + ?Sized,
+    {
+        let mut buf: [u8; 3] = unsafe { crate::uninitialized() };
+
+        f.write_str(usize(usize::from(*self), &mut buf))
+ 2ae:	cd 01       	movw	r24, r26
+ 2b0:	bf 01       	movw	r22, r30
+ 2b2:	0e 94 64 00 	call	0xc8	; 0xc8 <_ZN4ufmt18Formatter$LT$W$GT$9write_str17h8cd037506547acaeE>
+    if cfg!(debug_assertions) && !is_aligned_and_not_null(src) {
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_load`.
+    unsafe { intrinsics::volatile_load(src) }
+ 2b6:	80 91 c0 00 	lds	r24, 0x00C0	; 0x8000c0 <__DATA_REGION_ORIGIN__+0x60>
+ 2ba:	80 72       	andi	r24, 0x20	; 32
+ 2bc:	80 30       	cpi	r24, 0x00	; 0
+ 2be:	d9 f3       	breq	.-10     	; 0x2b6 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x1c4>
+ 2c0:	6a e0       	ldi	r22, 0x0A	; 10
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_store`.
+    unsafe {
+        intrinsics::volatile_store(dst, src);
+ 2c2:	60 93 c6 00 	sts	0x00C6, r22	; 0x8000c6 <__DATA_REGION_ORIGIN__+0x66>
+        self.cs_pin.set_high().void_unwrap();
+
+        for _ in 0..10 {
+            let byte = nb::block!(self.spi.read()).void_unwrap();
+            uwriteln!(serial, "The card responded {}", byte);
+            if byte & 0x80 == 0 {
+ 2c6:	83 2d       	mov	r24, r3
+ 2c8:	88 23       	and	r24, r24
+ 2ca:	a9 81       	ldd	r26, Y+1	; 0x01
+ 2cc:	ba 81       	ldd	r27, Y+2	; 0x02
+ 2ce:	94 01       	movw	r18, r8
+ 2d0:	4e e3       	ldi	r20, 0x3E	; 62
+ 2d2:	51 e0       	ldi	r21, 0x01	; 1
+ 2d4:	f2 01       	movw	r30, r4
+ 2d6:	0a f4       	brpl	.+2      	; 0x2da <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x1e8>
+ 2d8:	83 cf       	rjmp	.-250    	; 0x1e0 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0xee>
+ 2da:	80 e0       	ldi	r24, 0x00	; 0
+ 2dc:	01 c0       	rjmp	.+2      	; 0x2e0 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E+0x1ee>
+ 2de:	81 e0       	ldi	r24, 0x01	; 1
+                return Ok(byte);
+            }
+        }
+        Err(SdCardError::Error)
+    }
+ 2e0:	93 2d       	mov	r25, r3
+ 2e2:	29 96       	adiw	r28, 0x09	; 9
+ 2e4:	0f b6       	in	r0, 0x3f	; 63
+ 2e6:	f8 94       	cli
+ 2e8:	de bf       	out	0x3e, r29	; 62
+ 2ea:	0f be       	out	0x3f, r0	; 63
+ 2ec:	cd bf       	out	0x3d, r28	; 61
+ 2ee:	df 91       	pop	r29
+ 2f0:	cf 91       	pop	r28
+ 2f2:	1f 91       	pop	r17
+ 2f4:	0f 91       	pop	r16
+ 2f6:	ff 90       	pop	r15
+ 2f8:	ef 90       	pop	r14
+ 2fa:	df 90       	pop	r13
+ 2fc:	cf 90       	pop	r12
+ 2fe:	bf 90       	pop	r11
+ 300:	af 90       	pop	r10
+ 302:	9f 90       	pop	r9
+ 304:	8f 90       	pop	r8
+ 306:	7f 90       	pop	r7
+ 308:	6f 90       	pop	r6
+ 30a:	5f 90       	pop	r5
+ 30c:	4f 90       	pop	r4
+ 30e:	3f 90       	pop	r3
+ 310:	08 95       	ret
+
+00000312 <rust_begin_unwind>:
+    let sdcard = SdCard::new(spi, cs, &mut serial);
+    loop {}
+}
+
+#[panic_handler]
+fn panic(_info: &core::panic::PanicInfo) -> ! {
+ 312:	ef 92       	push	r14
+ 314:	ff 92       	push	r15
+ 316:	1f 93       	push	r17
+ 318:	60 e0       	ldi	r22, 0x00	; 0
+ 31a:	70 e0       	ldi	r23, 0x00	; 0
+ 31c:	27 ef       	ldi	r18, 0xF7	; 247
+ 31e:	3f e3       	ldi	r19, 0x3F	; 63
+ 320:	47 e1       	ldi	r20, 0x17	; 23
+ 322:	50 e0       	ldi	r21, 0x00	; 0
+ 324:	8b e7       	ldi	r24, 0x7B	; 123
+ 326:	9a e1       	ldi	r25, 0x1A	; 26
+ 328:	7c 01       	movw	r14, r24
+ 32a:	2d 9a       	sbi	0x05, 5	; 5
+ 32c:	fb 01       	movw	r30, r22
+ 32e:	db 01       	movw	r26, r22
+cfg_if::cfg_if! {
+    if #[cfg(target_arch = "avr")] {
+        #[allow(unused_assignments)]
+        fn busy_loop(mut c: u16) {
+            unsafe {
+                llvm_asm!("1: sbiw $0,1\n\tbrne 1b"
+ 330:	c9 01       	movw	r24, r18
+ 332:	01 97       	sbiw	r24, 0x01	; 1
+ 334:	f1 f7       	brne	.-4      	; 0x332 <rust_begin_unwind+0x20>
+ 336:	11 e0       	ldi	r17, 0x01	; 1
+        // compile down to fairly poor code. This is slightly better,
+        // but still has some overhead and may not lead to cycle-accurate
+        // delays.
+        let iters = us >> 12;
+        let mut i = 0;
+        while i < iters {
+ 338:	e4 17       	cp	r30, r20
+ 33a:	f5 07       	cpc	r31, r21
+ 33c:	a6 07       	cpc	r26, r22
+ 33e:	b7 07       	cpc	r27, r23
+ 340:	08 f0       	brcs	.+2      	; 0x344 <rust_begin_unwind+0x32>
+ 342:	10 e0       	ldi	r17, 0x00	; 0
+ 344:	11 70       	andi	r17, 0x01	; 1
+            delay::DelayUs::<u16>::delay_us(self, 0xfff);
+            i += 1;
+ 346:	ef 5f       	subi	r30, 0xFF	; 255
+ 348:	ff 4f       	sbci	r31, 0xFF	; 255
+ 34a:	af 4f       	sbci	r26, 0xFF	; 255
+ 34c:	bf 4f       	sbci	r27, 0xFF	; 255
+        // compile down to fairly poor code. This is slightly better,
+        // but still has some overhead and may not lead to cycle-accurate
+        // delays.
+        let iters = us >> 12;
+        let mut i = 0;
+        while i < iters {
+ 34e:	10 30       	cpi	r17, 0x00	; 0
+ 350:	79 f7       	brne	.-34     	; 0x330 <rust_begin_unwind+0x1e>
+ 352:	c7 01       	movw	r24, r14
+cfg_if::cfg_if! {
+    if #[cfg(target_arch = "avr")] {
+        #[allow(unused_assignments)]
+        fn busy_loop(mut c: u16) {
+            unsafe {
+                llvm_asm!("1: sbiw $0,1\n\tbrne 1b"
+ 354:	01 97       	sbiw	r24, 0x01	; 1
+ 356:	f1 f7       	brne	.-4      	; 0x354 <rust_begin_unwind+0x42>
+ 358:	2d 98       	cbi	0x05, 5	; 5
+ 35a:	fb 01       	movw	r30, r22
+ 35c:	db 01       	movw	r26, r22
+ 35e:	c9 01       	movw	r24, r18
+ 360:	01 97       	sbiw	r24, 0x01	; 1
+ 362:	f1 f7       	brne	.-4      	; 0x360 <rust_begin_unwind+0x4e>
+ 364:	11 e0       	ldi	r17, 0x01	; 1
+        // compile down to fairly poor code. This is slightly better,
+        // but still has some overhead and may not lead to cycle-accurate
+        // delays.
+        let iters = us >> 12;
+        let mut i = 0;
+        while i < iters {
+ 366:	e4 17       	cp	r30, r20
+ 368:	f5 07       	cpc	r31, r21
+ 36a:	a6 07       	cpc	r26, r22
+ 36c:	b7 07       	cpc	r27, r23
+ 36e:	08 f0       	brcs	.+2      	; 0x372 <rust_begin_unwind+0x60>
+ 370:	10 e0       	ldi	r17, 0x00	; 0
+ 372:	11 70       	andi	r17, 0x01	; 1
+            delay::DelayUs::<u16>::delay_us(self, 0xfff);
+            i += 1;
+ 374:	ef 5f       	subi	r30, 0xFF	; 255
+ 376:	ff 4f       	sbci	r31, 0xFF	; 255
+ 378:	af 4f       	sbci	r26, 0xFF	; 255
+ 37a:	bf 4f       	sbci	r27, 0xFF	; 255
+        // compile down to fairly poor code. This is slightly better,
+        // but still has some overhead and may not lead to cycle-accurate
+        // delays.
+        let iters = us >> 12;
+        let mut i = 0;
+        while i < iters {
+ 37c:	10 30       	cpi	r17, 0x00	; 0
+ 37e:	79 f7       	brne	.-34     	; 0x35e <rust_begin_unwind+0x4c>
+ 380:	c7 01       	movw	r24, r14
+cfg_if::cfg_if! {
+    if #[cfg(target_arch = "avr")] {
+        #[allow(unused_assignments)]
+        fn busy_loop(mut c: u16) {
+            unsafe {
+                llvm_asm!("1: sbiw $0,1\n\tbrne 1b"
+ 382:	01 97       	sbiw	r24, 0x01	; 1
+ 384:	f1 f7       	brne	.-4      	; 0x382 <rust_begin_unwind+0x70>
+ 386:	d1 cf       	rjmp	.-94     	; 0x32a <rust_begin_unwind+0x18>
+
+00000388 <main>:
+    Phase,
+    Polarity,
+};
+use sdfat_rs::sdcard::SdCard;
+
+#[arduino_hal::entry]
+ 388:	2f 92       	push	r2
+ 38a:	3f 92       	push	r3
+ 38c:	4f 92       	push	r4
+ 38e:	5f 92       	push	r5
+ 390:	6f 92       	push	r6
+ 392:	7f 92       	push	r7
+ 394:	8f 92       	push	r8
+ 396:	9f 92       	push	r9
+ 398:	af 92       	push	r10
+ 39a:	bf 92       	push	r11
+ 39c:	cf 92       	push	r12
+ 39e:	df 92       	push	r13
+ 3a0:	ef 92       	push	r14
+ 3a2:	ff 92       	push	r15
+ 3a4:	0f 93       	push	r16
+ 3a6:	1f 93       	push	r17
+ 3a8:	cf 93       	push	r28
+ 3aa:	df 93       	push	r29
+ 3ac:	cd b7       	in	r28, 0x3d	; 61
+ 3ae:	de b7       	in	r29, 0x3e	; 62
+ 3b0:	25 97       	sbiw	r28, 0x05	; 5
+ 3b2:	0f b6       	in	r0, 0x3f	; 63
+ 3b4:	f8 94       	cli
+ 3b6:	de bf       	out	0x3e, r29	; 62
+ 3b8:	0f be       	out	0x3f, r0	; 63
+ 3ba:	cd bf       	out	0x3d, r28	; 61
+        if #[cfg(target_arch = "avr")] {
+            let sreg: u8;
+
+            // Store current state
+            unsafe {
+                llvm_asm!("in $0,0x3F" :"=r"(sreg) ::: "volatile");
+ 3bc:	8f b7       	in	r24, 0x3f	; 63
+#[inline]
+/// Disables all interrupts
+pub fn disable() {
+    cfg_if::cfg_if! {
+        if #[cfg(target_arch = "avr")] {
+            unsafe { llvm_asm!("cli" :::: "volatile") };
+ 3be:	f8 94       	cli
+impl atmega328p::Peripherals {
+    /// Returns all the peripherals *once*
+    #[inline]
+    pub fn take() -> Option<Self> {
+        crate::interrupt::free(|_| {
+            if unsafe { DEVICE_PERIPHERALS } {
+ 3c0:	90 91 7a 01 	lds	r25, 0x017A	; 0x80017a <__data_end>
+ 3c4:	90 30       	cpi	r25, 0x00	; 0
+ 3c6:	11 f0       	breq	.+4      	; 0x3cc <main+0x44>
+ 3c8:	90 e0       	ldi	r25, 0x00	; 0
+ 3ca:	03 c0       	rjmp	.+6      	; 0x3d2 <main+0x4a>
+ 3cc:	91 e0       	ldi	r25, 0x01	; 1
+}
+impl Peripherals {
+    #[doc = r"Unchecked version of `Peripherals::take`"]
+    #[inline]
+    pub unsafe fn steal() -> Self {
+        DEVICE_PERIPHERALS = true;
+ 3ce:	90 93 7a 01 	sts	0x017A, r25	; 0x80017a <__data_end>
+            disable();
+
+            let r = f(unsafe { &CriticalSection::new() });
+
+            // Restore interrupt state
+            if sreg & 0x80 != 0x00 {
+ 3d2:	88 23       	and	r24, r24
+ 3d4:	0a f4       	brpl	.+2      	; 0x3d8 <main+0x50>
+///
+/// - Do not call this function inside an [crate::interrupt::free] critical section
+pub unsafe fn enable() {
+    cfg_if::cfg_if! {
+        if #[cfg(target_arch = "avr")] {
+            llvm_asm!("sei" :::: "volatile");
+ 3d6:	78 94       	sei
+    #[track_caller]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[rustc_const_unstable(feature = "const_option", issue = "67441")]
+    pub const fn unwrap(self) -> T {
+        match self {
+            Some(val) => val,
+ 3d8:	90 30       	cpi	r25, 0x00	; 0
+ 3da:	09 f4       	brne	.+2      	; 0x3de <main+0x56>
+ 3dc:	4b c1       	rjmp	.+662    	; 0x674 <__LOCK_REGION_LENGTH__+0x274>
+ 3de:	59 98       	cbi	0x0b, 1	; 11
+ 3e0:	51 9a       	sbi	0x0a, 1	; 10
+ 3e2:	80 e1       	ldi	r24, 0x10	; 16
+ 3e4:	90 e0       	ldi	r25, 0x00	; 0
+ 3e6:	90 93 c5 00 	sts	0x00C5, r25	; 0x8000c5 <__DATA_REGION_ORIGIN__+0x65>
+ 3ea:	80 93 c4 00 	sts	0x00C4, r24	; 0x8000c4 <__DATA_REGION_ORIGIN__+0x64>
+ 3ee:	80 e0       	ldi	r24, 0x00	; 0
+ 3f0:	80 93 c0 00 	sts	0x00C0, r24	; 0x8000c0 <__DATA_REGION_ORIGIN__+0x60>
+ 3f4:	98 e1       	ldi	r25, 0x18	; 24
+ 3f6:	90 93 c1 00 	sts	0x00C1, r25	; 0x8000c1 <__DATA_REGION_ORIGIN__+0x61>
+ 3fa:	96 e0       	ldi	r25, 0x06	; 6
+ 3fc:	90 93 c2 00 	sts	0x00C2, r25	; 0x8000c2 <__DATA_REGION_ORIGIN__+0x62>
+ 400:	2d 98       	cbi	0x05, 5	; 5
+ 402:	25 9a       	sbi	0x04, 5	; 4
+ 404:	2b 98       	cbi	0x05, 3	; 5
+ 406:	23 9a       	sbi	0x04, 3	; 4
+ 408:	24 98       	cbi	0x04, 4	; 4
+ 40a:	2c 9a       	sbi	0x05, 4	; 5
+ 40c:	2a 98       	cbi	0x05, 2	; 5
+ 40e:	22 9a       	sbi	0x04, 2	; 4
+ 410:	92 e5       	ldi	r25, 0x52	; 82
+ 412:	9c bd       	out	0x2c, r25	; 44
+ 414:	8d bd       	out	0x2d, r24	; 45
+    pub fn new(
+        spi: Spi,
+        cs_pin: ChipSelectPin<CSPIN>,
+        serial: &mut Usart0<MHz16>,
+    ) -> SdCard<CSPIN> {
+        let mut sdcard = SdCard { spi, cs_pin };
+ 416:	89 83       	std	Y+1, r24	; 0x01
+ 418:	2a 9a       	sbi	0x05, 2	; 5
+ 41a:	80 e0       	ldi	r24, 0x00	; 0
+ 41c:	90 e0       	ldi	r25, 0x00	; 0
+ 41e:	31 e0       	ldi	r19, 0x01	; 1
+ 420:	2f ef       	ldi	r18, 0xFF	; 255
+ 422:	49 e0       	ldi	r20, 0x09	; 9
+ 424:	50 e0       	ldi	r21, 0x00	; 0
+ 426:	bc 01       	movw	r22, r24
+ 428:	fc 01       	movw	r30, r24
+        self.p.raw_release();
+        (self.p, self.sclk, self.mosi, self.miso, cs.0)
+    }
+
+    fn flush(&mut self) -> nb::Result<(), void::Void> {
+        if self.write_in_progress {
+ 42a:	a3 2f       	mov	r26, r19
+ 42c:	a1 70       	andi	r26, 0x01	; 1
+ 42e:	a0 30       	cpi	r26, 0x00	; 0
+ 430:	39 f4       	brne	.+14     	; 0x440 <__LOCK_REGION_LENGTH__+0x40>
+    if cfg!(debug_assertions) && !is_aligned_and_not_null(src) {
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_load`.
+    unsafe { intrinsics::volatile_load(src) }
+ 432:	bd b5       	in	r27, 0x2d	; 45
+ 434:	a1 e0       	ldi	r26, 0x01	; 1
+        WCOL_R::new(((self.bits >> 6) & 0x01) != 0)
+    }
+    #[doc = "Bit 7 - SPI Interrupt Flag"]
+    #[inline(always)]
+    pub fn spif(&self) -> SPIF_R {
+        SPIF_R::new(((self.bits >> 7) & 0x01) != 0)
+ 436:	bb 23       	and	r27, r27
+ 438:	0a f0       	brmi	.+2      	; 0x43c <__LOCK_REGION_LENGTH__+0x3c>
+ 43a:	a0 e0       	ldi	r26, 0x00	; 0
+            if self.p.raw_check_iflag() {
+ 43c:	a3 2b       	or	r26, r19
+ 43e:	f6 cf       	rjmp	.-20     	; 0x42c <__LOCK_REGION_LENGTH__+0x2c>
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_store`.
+    unsafe {
+        intrinsics::volatile_store(dst, src);
+ 440:	2e bd       	out	0x2e, r18	; 46
+ 442:	30 e0       	ldi	r19, 0x00	; 0
+ 444:	a1 e0       	ldi	r26, 0x01	; 1
+ 446:	64 17       	cp	r22, r20
+ 448:	75 07       	cpc	r23, r21
+ 44a:	e8 07       	cpc	r30, r24
+ 44c:	f9 07       	cpc	r31, r25
+ 44e:	08 f4       	brcc	.+2      	; 0x452 <__LOCK_REGION_LENGTH__+0x52>
+ 450:	a0 e0       	ldi	r26, 0x00	; 0
+ 452:	a1 70       	andi	r26, 0x01	; 1
+ 454:	6f 5f       	subi	r22, 0xFF	; 255
+ 456:	7f 4f       	sbci	r23, 0xFF	; 255
+ 458:	ef 4f       	sbci	r30, 0xFF	; 255
+ 45a:	ff 4f       	sbci	r31, 0xFF	; 255
+ 45c:	a0 30       	cpi	r26, 0x00	; 0
+ 45e:	29 f3       	breq	.-54     	; 0x42a <__LOCK_REGION_LENGTH__+0x2a>
+ 460:	81 e0       	ldi	r24, 0x01	; 1
+ 462:	89 83       	std	Y+1, r24	; 0x01
+ 464:	2a 98       	cbi	0x05, 2	; 5
+ 466:	ce 01       	movw	r24, r28
+ 468:	01 96       	adiw	r24, 0x01	; 1
+ 46a:	20 e0       	ldi	r18, 0x00	; 0
+ 46c:	30 e0       	ldi	r19, 0x00	; 0
+ 46e:	8e 01       	movw	r16, r28
+ 470:	0b 5f       	subi	r16, 0xFB	; 251
+ 472:	1f 4f       	sbci	r17, 0xFF	; 255
+        for _ in 0..10 {
+            nb::block!(sdcard.spi.send(0xff)).void_unwrap();
+        }
+        sdcard.cs_pin.set_low().void_unwrap();
+
+        let response = sdcard.send_card_command(SdCommand::GoIdleState, 0x0, serial);
+ 474:	60 e0       	ldi	r22, 0x00	; 0
+ 476:	a9 01       	movw	r20, r18
+ 478:	0e 94 79 00 	call	0xf2	; 0xf2 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E>
+        match response {
+            Ok(b) => uwriteln!(serial, "Sent CMD0, got {}", b).void_unwrap(),
+ 47c:	81 70       	andi	r24, 0x01	; 1
+ 47e:	80 30       	cpi	r24, 0x00	; 0
+ 480:	09 f0       	breq	.+2      	; 0x484 <__LOCK_REGION_LENGTH__+0x84>
+ 482:	fc c0       	rjmp	.+504    	; 0x67c <__LOCK_REGION_LENGTH__+0x27c>
+ 484:	a1 e6       	ldi	r26, 0x61	; 97
+ 486:	b1 e0       	ldi	r27, 0x01	; 1
+ 488:	20 e7       	ldi	r18, 0x70	; 112
+ 48a:	31 e0       	ldi	r19, 0x01	; 1
+impl<H, USART: UsartOps<H, RX, TX>, RX, TX, CLOCK> ufmt::uWrite for Usart<H, USART, RX, TX, CLOCK> {
+    type Error = void::Void;
+
+    fn write_str(&mut self, s: &str) -> Result<(), Self::Error> {
+        for b in s.as_bytes().iter() {
+            self.write_byte(*b);
+ 48c:	8c 91       	ld	r24, X
+    if cfg!(debug_assertions) && !is_aligned_and_not_null(src) {
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_load`.
+    unsafe { intrinsics::volatile_load(src) }
+ 48e:	40 91 c0 00 	lds	r20, 0x00C0	; 0x8000c0 <__DATA_REGION_ORIGIN__+0x60>
+ 492:	40 72       	andi	r20, 0x20	; 32
+                    }
+                }
+
+                fn raw_write(&mut self, byte: u8) -> $crate::nb::Result<(), $crate::void::Void> {
+                    // Call flush to make sure the data-register is empty
+                    self.raw_flush()?;
+ 494:	40 30       	cpi	r20, 0x00	; 0
+ 496:	d9 f3       	breq	.-10     	; 0x48e <__LOCK_REGION_LENGTH__+0x8e>
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_store`.
+    unsafe {
+        intrinsics::volatile_store(dst, src);
+ 498:	80 93 c6 00 	sts	0x00C6, r24	; 0x8000c6 <__DATA_REGION_ORIGIN__+0x66>
+ 49c:	11 96       	adiw	r26, 0x01	; 1
+ 49e:	a2 17       	cp	r26, r18
+ 4a0:	b3 07       	cpc	r27, r19
+ 4a2:	a1 f7       	brne	.-24     	; 0x48c <__LOCK_REGION_LENGTH__+0x8c>
+ 4a4:	8d ec       	ldi	r24, 0xCD	; 205
+        unsafe { str::from_utf8_unchecked($buf.get(i..).unwrap_or_else(|| assume_unreachable!())) }
+    }};
+}
+
+fn usize(n: usize, buf: &mut [u8]) -> &str {
+    uxx!(n, buf)
+ 4a6:	98 9f       	mul	r25, r24
+ 4a8:	81 2d       	mov	r24, r1
+ 4aa:	11 24       	eor	r1, r1
+ 4ac:	86 95       	lsr	r24
+ 4ae:	86 95       	lsr	r24
+ 4b0:	86 95       	lsr	r24
+ 4b2:	2a e0       	ldi	r18, 0x0A	; 10
+ 4b4:	82 02       	muls	r24, r18
+ 4b6:	11 24       	eor	r1, r1
+ 4b8:	89 2f       	mov	r24, r25
+ 4ba:	80 19       	sub	r24, r0
+ 4bc:	80 63       	ori	r24, 0x30	; 48
+ 4be:	8c 83       	std	Y+4, r24	; 0x04
+ 4c0:	9e 01       	movw	r18, r28
+ 4c2:	2e 5f       	subi	r18, 0xFE	; 254
+ 4c4:	3f 4f       	sbci	r19, 0xFF	; 255
+ 4c6:	f9 01       	movw	r30, r18
+ 4c8:	32 96       	adiw	r30, 0x02	; 2
+ 4ca:	9a 30       	cpi	r25, 0x0A	; 10
+ 4cc:	64 e6       	ldi	r22, 0x64	; 100
+ 4ce:	70 e0       	ldi	r23, 0x00	; 0
+ 4d0:	69 01       	movw	r12, r18
+ 4d2:	4b 01       	movw	r8, r22
+ 4d4:	30 f4       	brcc	.+12     	; 0x4e2 <__LOCK_REGION_LENGTH__+0xe2>
+ 4d6:	81 e0       	ldi	r24, 0x01	; 1
+ 4d8:	90 e0       	ldi	r25, 0x00	; 0
+ 4da:	3f 01       	movw	r6, r30
+ 4dc:	df 01       	movw	r26, r30
+ 4de:	fc 01       	movw	r30, r24
+ 4e0:	23 c0       	rjmp	.+70     	; 0x528 <__LOCK_REGION_LENGTH__+0x128>
+ 4e2:	3f 01       	movw	r6, r30
+ 4e4:	09 2f       	mov	r16, r25
+ 4e6:	11 27       	eor	r17, r17
+ 4e8:	e2 e0       	ldi	r30, 0x02	; 2
+ 4ea:	f0 e0       	ldi	r31, 0x00	; 0
+ 4ec:	8a e0       	ldi	r24, 0x0A	; 10
+ 4ee:	90 e0       	ldi	r25, 0x00	; 0
+ 4f0:	5c 01       	movw	r10, r24
+ 4f2:	c8 01       	movw	r24, r16
+ 4f4:	15 01       	movw	r2, r10
+ 4f6:	b1 01       	movw	r22, r2
+ 4f8:	2f 01       	movw	r4, r30
+ 4fa:	0e 94 5a 03 	call	0x6b4	; 0x6b4 <__udivmodhi4>
+ 4fe:	7b 01       	movw	r14, r22
+ 500:	c7 01       	movw	r24, r14
+ 502:	b1 01       	movw	r22, r2
+ 504:	0e 94 5a 03 	call	0x6b4	; 0x6b4 <__udivmodhi4>
+ 508:	f2 01       	movw	r30, r4
+ 50a:	94 01       	movw	r18, r8
+ 50c:	d6 01       	movw	r26, r12
+ 50e:	31 97       	sbiw	r30, 0x01	; 1
+ 510:	ae 0f       	add	r26, r30
+ 512:	bf 1f       	adc	r27, r31
+ 514:	80 63       	ori	r24, 0x30	; 48
+ 516:	8c 93       	st	X, r24
+ 518:	02 17       	cp	r16, r18
+ 51a:	13 07       	cpc	r17, r19
+ 51c:	87 01       	movw	r16, r14
+ 51e:	48 f7       	brcc	.-46     	; 0x4f2 <__LOCK_REGION_LENGTH__+0xf2>
+ 520:	83 e0       	ldi	r24, 0x03	; 3
+ 522:	90 e0       	ldi	r25, 0x00	; 0
+ 524:	e8 27       	eor	r30, r24
+ 526:	f9 27       	eor	r31, r25
+    where
+        W: uWrite + ?Sized,
+    {
+        let mut buf: [u8; 3] = unsafe { crate::uninitialized() };
+
+        f.write_str(usize(usize::from(*self), &mut buf))
+ 528:	cd 01       	movw	r24, r26
+ 52a:	bf 01       	movw	r22, r30
+ 52c:	0e 94 64 00 	call	0xc8	; 0xc8 <_ZN4ufmt18Formatter$LT$W$GT$9write_str17h8cd037506547acaeE>
+    if cfg!(debug_assertions) && !is_aligned_and_not_null(src) {
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_load`.
+    unsafe { intrinsics::volatile_load(src) }
+ 530:	80 91 c0 00 	lds	r24, 0x00C0	; 0x8000c0 <__DATA_REGION_ORIGIN__+0x60>
+ 534:	80 72       	andi	r24, 0x20	; 32
+ 536:	80 30       	cpi	r24, 0x00	; 0
+ 538:	d9 f3       	breq	.-10     	; 0x530 <__LOCK_REGION_LENGTH__+0x130>
+ 53a:	8a e0       	ldi	r24, 0x0A	; 10
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_store`.
+    unsafe {
+        intrinsics::volatile_store(dst, src);
+ 53c:	80 93 c6 00 	sts	0x00C6, r24	; 0x8000c6 <__DATA_REGION_ORIGIN__+0x66>
+ 540:	ce 01       	movw	r24, r28
+ 542:	01 96       	adiw	r24, 0x01	; 1
+ 544:	2a ea       	ldi	r18, 0xAA	; 170
+ 546:	31 e0       	ldi	r19, 0x01	; 1
+ 548:	40 e0       	ldi	r20, 0x00	; 0
+ 54a:	50 e0       	ldi	r21, 0x00	; 0
+ 54c:	8e 01       	movw	r16, r28
+ 54e:	0b 5f       	subi	r16, 0xFB	; 251
+ 550:	1f 4f       	sbci	r17, 0xFF	; 255
+            Err(_) => { uwriteln!(serial, "Sent CMD0, got error").void_unwrap(); panic!() }
+        }
+        sdcard.send_card_command(SdCommand::SendIfCond, 0x1AA, serial);
+ 552:	68 e0       	ldi	r22, 0x08	; 8
+ 554:	7a 01       	movw	r14, r20
+ 556:	0e 94 79 00 	call	0xf2	; 0xf2 <_ZN8sdfat_rs6sdcard19SdCard$LT$CSPIN$GT$17send_card_command17hd907728c33a58eb6E>
+ 55a:	a0 e7       	ldi	r26, 0x70	; 112
+ 55c:	b1 e0       	ldi	r27, 0x01	; 1
+ 55e:	8a e7       	ldi	r24, 0x7A	; 122
+ 560:	91 e0       	ldi	r25, 0x01	; 1
+impl<H, USART: UsartOps<H, RX, TX>, RX, TX, CLOCK> ufmt::uWrite for Usart<H, USART, RX, TX, CLOCK> {
+    type Error = void::Void;
+
+    fn write_str(&mut self, s: &str) -> Result<(), Self::Error> {
+        for b in s.as_bytes().iter() {
+            self.write_byte(*b);
+ 562:	2c 91       	ld	r18, X
+    if cfg!(debug_assertions) && !is_aligned_and_not_null(src) {
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_load`.
+    unsafe { intrinsics::volatile_load(src) }
+ 564:	30 91 c0 00 	lds	r19, 0x00C0	; 0x8000c0 <__DATA_REGION_ORIGIN__+0x60>
+ 568:	30 72       	andi	r19, 0x20	; 32
+                    }
+                }
+
+                fn raw_write(&mut self, byte: u8) -> $crate::nb::Result<(), $crate::void::Void> {
+                    // Call flush to make sure the data-register is empty
+                    self.raw_flush()?;
+ 56a:	30 30       	cpi	r19, 0x00	; 0
+ 56c:	d9 f3       	breq	.-10     	; 0x564 <__LOCK_REGION_LENGTH__+0x164>
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_store`.
+    unsafe {
+        intrinsics::volatile_store(dst, src);
+ 56e:	20 93 c6 00 	sts	0x00C6, r18	; 0x8000c6 <__DATA_REGION_ORIGIN__+0x66>
+ 572:	11 96       	adiw	r26, 0x01	; 1
+ 574:	a8 17       	cp	r26, r24
+ 576:	b9 07       	cpc	r27, r25
+ 578:	a1 f7       	brne	.-24     	; 0x562 <__LOCK_REGION_LENGTH__+0x162>
+ 57a:	99 81       	ldd	r25, Y+1	; 0x01
+ 57c:	81 e0       	ldi	r24, 0x01	; 1
+ 57e:	90 30       	cpi	r25, 0x00	; 0
+ 580:	09 f0       	breq	.+2      	; 0x584 <__LOCK_REGION_LENGTH__+0x184>
+ 582:	80 e0       	ldi	r24, 0x00	; 0
+ 584:	d7 01       	movw	r26, r14
+ 586:	9d 01       	movw	r18, r26
+ 588:	ad 01       	movw	r20, r26
+ 58a:	e3 e0       	ldi	r30, 0x03	; 3
+ 58c:	f0 e0       	ldi	r31, 0x00	; 0
+        self.p.raw_release();
+        (self.p, self.sclk, self.mosi, self.miso, cs.0)
+    }
+
+    fn flush(&mut self) -> nb::Result<(), void::Void> {
+        if self.write_in_progress {
+ 58e:	98 2f       	mov	r25, r24
+ 590:	91 70       	andi	r25, 0x01	; 1
+ 592:	90 30       	cpi	r25, 0x00	; 0
+ 594:	59 f4       	brne	.+22     	; 0x5ac <__LOCK_REGION_LENGTH__+0x1ac>
+    if cfg!(debug_assertions) && !is_aligned_and_not_null(src) {
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_load`.
+    unsafe { intrinsics::volatile_load(src) }
+ 596:	6d b5       	in	r22, 0x2d	; 45
+ 598:	91 e0       	ldi	r25, 0x01	; 1
+ 59a:	66 23       	and	r22, r22
+ 59c:	0a f4       	brpl	.+2      	; 0x5a0 <__LOCK_REGION_LENGTH__+0x1a0>
+ 59e:	90 e0       	ldi	r25, 0x00	; 0
+            if self.p.raw_check_iflag() {
+ 5a0:	68 2f       	mov	r22, r24
+ 5a2:	60 95       	com	r22
+ 5a4:	69 23       	and	r22, r25
+ 5a6:	61 70       	andi	r22, 0x01	; 1
+ 5a8:	60 30       	cpi	r22, 0x00	; 0
+ 5aa:	a9 f7       	brne	.-22     	; 0x596 <__LOCK_REGION_LENGTH__+0x196>
+ 5ac:	81 e0       	ldi	r24, 0x01	; 1
+ 5ae:	2e 17       	cp	r18, r30
+ 5b0:	3f 07       	cpc	r19, r31
+ 5b2:	4a 07       	cpc	r20, r26
+ 5b4:	5b 07       	cpc	r21, r27
+ 5b6:	61 e0       	ldi	r22, 0x01	; 1
+ 5b8:	08 f0       	brcs	.+2      	; 0x5bc <__LOCK_REGION_LENGTH__+0x1bc>
+ 5ba:	60 e0       	ldi	r22, 0x00	; 0
+ 5bc:	61 70       	andi	r22, 0x01	; 1
+ 5be:	2f 5f       	subi	r18, 0xFF	; 255
+ 5c0:	3f 4f       	sbci	r19, 0xFF	; 255
+ 5c2:	4f 4f       	sbci	r20, 0xFF	; 255
+ 5c4:	5f 4f       	sbci	r21, 0xFF	; 255
+ 5c6:	9e b5       	in	r25, 0x2e	; 46
+ 5c8:	60 30       	cpi	r22, 0x00	; 0
+ 5ca:	09 f7       	brne	.-62     	; 0x58e <__LOCK_REGION_LENGTH__+0x18e>
+ 5cc:	80 e0       	ldi	r24, 0x00	; 0
+ 5ce:	89 83       	std	Y+1, r24	; 0x01
+ 5d0:	ab e2       	ldi	r26, 0x2B	; 43
+ 5d2:	b1 e0       	ldi	r27, 0x01	; 1
+ 5d4:	2e e3       	ldi	r18, 0x3E	; 62
+ 5d6:	31 e0       	ldi	r19, 0x01	; 1
+impl<H, USART: UsartOps<H, RX, TX>, RX, TX, CLOCK> ufmt::uWrite for Usart<H, USART, RX, TX, CLOCK> {
+    type Error = void::Void;
+
+    fn write_str(&mut self, s: &str) -> Result<(), Self::Error> {
+        for b in s.as_bytes().iter() {
+            self.write_byte(*b);
+ 5d8:	8c 91       	ld	r24, X
+ 5da:	40 91 c0 00 	lds	r20, 0x00C0	; 0x8000c0 <__DATA_REGION_ORIGIN__+0x60>
+ 5de:	40 72       	andi	r20, 0x20	; 32
+                    }
+                }
+
+                fn raw_write(&mut self, byte: u8) -> $crate::nb::Result<(), $crate::void::Void> {
+                    // Call flush to make sure the data-register is empty
+                    self.raw_flush()?;
+ 5e0:	40 30       	cpi	r20, 0x00	; 0
+ 5e2:	d9 f3       	breq	.-10     	; 0x5da <__LOCK_REGION_LENGTH__+0x1da>
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_store`.
+    unsafe {
+        intrinsics::volatile_store(dst, src);
+ 5e4:	80 93 c6 00 	sts	0x00C6, r24	; 0x8000c6 <__DATA_REGION_ORIGIN__+0x66>
+ 5e8:	11 96       	adiw	r26, 0x01	; 1
+ 5ea:	a2 17       	cp	r26, r18
+ 5ec:	b3 07       	cpc	r27, r19
+ 5ee:	a1 f7       	brne	.-24     	; 0x5d8 <__LOCK_REGION_LENGTH__+0x1d8>
+ 5f0:	8d ec       	ldi	r24, 0xCD	; 205
+        unsafe { str::from_utf8_unchecked($buf.get(i..).unwrap_or_else(|| assume_unreachable!())) }
+    }};
+}
+
+fn usize(n: usize, buf: &mut [u8]) -> &str {
+    uxx!(n, buf)
+ 5f2:	98 9f       	mul	r25, r24
+ 5f4:	81 2d       	mov	r24, r1
+ 5f6:	11 24       	eor	r1, r1
+ 5f8:	86 95       	lsr	r24
+ 5fa:	86 95       	lsr	r24
+ 5fc:	86 95       	lsr	r24
+ 5fe:	2a e0       	ldi	r18, 0x0A	; 10
+ 600:	82 02       	muls	r24, r18
+ 602:	11 24       	eor	r1, r1
+ 604:	89 2f       	mov	r24, r25
+ 606:	80 19       	sub	r24, r0
+ 608:	80 63       	ori	r24, 0x30	; 48
+ 60a:	d3 01       	movw	r26, r6
+ 60c:	8c 93       	st	X, r24
+ 60e:	9a 30       	cpi	r25, 0x0A	; 10
+ 610:	18 f4       	brcc	.+6      	; 0x618 <__LOCK_REGION_LENGTH__+0x218>
+ 612:	e1 e0       	ldi	r30, 0x01	; 1
+ 614:	f0 e0       	ldi	r31, 0x00	; 0
+ 616:	21 c0       	rjmp	.+66     	; 0x65a <__LOCK_REGION_LENGTH__+0x25a>
+ 618:	09 2f       	mov	r16, r25
+ 61a:	11 27       	eor	r17, r17
+ 61c:	e2 e0       	ldi	r30, 0x02	; 2
+ 61e:	f0 e0       	ldi	r31, 0x00	; 0
+ 620:	8a e0       	ldi	r24, 0x0A	; 10
+ 622:	90 e0       	ldi	r25, 0x00	; 0
+ 624:	2c 01       	movw	r4, r24
+ 626:	c8 01       	movw	r24, r16
+ 628:	52 01       	movw	r10, r4
+ 62a:	b5 01       	movw	r22, r10
+ 62c:	3f 01       	movw	r6, r30
+ 62e:	0e 94 5a 03 	call	0x6b4	; 0x6b4 <__udivmodhi4>
+ 632:	7b 01       	movw	r14, r22
+ 634:	c7 01       	movw	r24, r14
+ 636:	b5 01       	movw	r22, r10
+ 638:	0e 94 5a 03 	call	0x6b4	; 0x6b4 <__udivmodhi4>
+ 63c:	f3 01       	movw	r30, r6
+ 63e:	31 97       	sbiw	r30, 0x01	; 1
+ 640:	d6 01       	movw	r26, r12
+ 642:	ae 0f       	add	r26, r30
+ 644:	bf 1f       	adc	r27, r31
+ 646:	80 63       	ori	r24, 0x30	; 48
+ 648:	8c 93       	st	X, r24
+ 64a:	08 15       	cp	r16, r8
+ 64c:	19 05       	cpc	r17, r9
+ 64e:	87 01       	movw	r16, r14
+ 650:	50 f7       	brcc	.-44     	; 0x626 <__LOCK_REGION_LENGTH__+0x226>
+ 652:	83 e0       	ldi	r24, 0x03	; 3
+ 654:	90 e0       	ldi	r25, 0x00	; 0
+ 656:	e8 27       	eor	r30, r24
+ 658:	f9 27       	eor	r31, r25
+    where
+        W: uWrite + ?Sized,
+    {
+        let mut buf: [u8; 3] = unsafe { crate::uninitialized() };
+
+        f.write_str(usize(usize::from(*self), &mut buf))
+ 65a:	cd 01       	movw	r24, r26
+ 65c:	bf 01       	movw	r22, r30
+ 65e:	0e 94 64 00 	call	0xc8	; 0xc8 <_ZN4ufmt18Formatter$LT$W$GT$9write_str17h8cd037506547acaeE>
+    if cfg!(debug_assertions) && !is_aligned_and_not_null(src) {
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_load`.
+    unsafe { intrinsics::volatile_load(src) }
+ 662:	80 91 c0 00 	lds	r24, 0x00C0	; 0x8000c0 <__DATA_REGION_ORIGIN__+0x60>
+ 666:	80 72       	andi	r24, 0x20	; 32
+ 668:	80 30       	cpi	r24, 0x00	; 0
+ 66a:	d9 f3       	breq	.-10     	; 0x662 <__LOCK_REGION_LENGTH__+0x262>
+ 66c:	8a e0       	ldi	r24, 0x0A	; 10
+        // Not panicking to keep codegen impact smaller.
+        abort();
+    }
+    // SAFETY: the caller must uphold the safety contract for `volatile_store`.
+    unsafe {
+        intrinsics::volatile_store(dst, src);
+ 66e:	80 93 c6 00 	sts	0x00C6, r24	; 0x8000c6 <__DATA_REGION_ORIGIN__+0x66>
+            mode: MODE_0,
+        },
+    );
+
+    let sdcard = SdCard::new(spi, cs, &mut serial);
+    loop {}
+ 672:	ff cf       	rjmp	.-2      	; 0x672 <__LOCK_REGION_LENGTH__+0x272>
+            None => panic!("called `Option::unwrap()` on a `None` value"),
+ 674:	80 e0       	ldi	r24, 0x00	; 0
+ 676:	91 e0       	ldi	r25, 0x01	; 1
+ 678:	6b e2       	ldi	r22, 0x2B	; 43
+ 67a:	07 c0       	rjmp	.+14     	; 0x68a <__LOCK_REGION_LENGTH__+0x28a>
+ 67c:	ce 01       	movw	r24, r28
+ 67e:	05 96       	adiw	r24, 0x05	; 5
+        sdcard.cs_pin.set_low().void_unwrap();
+
+        let response = sdcard.send_card_command(SdCommand::GoIdleState, 0x0, serial);
+        match response {
+            Ok(b) => uwriteln!(serial, "Sent CMD0, got {}", b).void_unwrap(),
+            Err(_) => { uwriteln!(serial, "Sent CMD0, got error").void_unwrap(); panic!() }
+ 680:	0e 94 53 00 	call	0xa6	; 0xa6 <_ZN49_$LT$W$u20$as$u20$ufmt..UnstableDoAsFormatter$GT$15do_as_formatter17hb92733a67da40f7fE>
+ 684:	8e e3       	ldi	r24, 0x3E	; 62
+ 686:	91 e0       	ldi	r25, 0x01	; 1
+ 688:	6e e0       	ldi	r22, 0x0E	; 14
+ 68a:	70 e0       	ldi	r23, 0x00	; 0
+ 68c:	0e 94 4a 03 	call	0x694	; 0x694 <_ZN4core9panicking5panic17h3740debcb88707a3E>
+ 690:	0e 94 52 03 	call	0x6a4	; 0x6a4 <abort>
+
+00000694 <_ZN4core9panicking5panic17h3740debcb88707a3E>:
+    // reduce size overhead. The format_args! macro uses str's Display trait to
+    // write expr, which calls Formatter::pad, which must accommodate string
+    // truncation and padding (even though none is used here). Using
+    // Arguments::new_v1 may allow the compiler to omit Formatter::pad from the
+    // output binary, saving up to a few kilobytes.
+    panic_fmt(fmt::Arguments::new_v1(&[expr], &[]));
+ 694:	0e 94 4e 03 	call	0x69c	; 0x69c <_ZN4core9panicking9panic_fmt17hffc6dadf5838b73aE>
+ 698:	0e 94 52 03 	call	0x6a4	; 0x6a4 <abort>
+
+0000069c <_ZN4core9panicking9panic_fmt17hffc6dadf5838b73aE>:
+    }
+
+    let pi = PanicInfo::internal_constructor(Some(&fmt), Location::caller());
+
+    // SAFETY: `panic_impl` is defined in safe Rust code and thus is safe to call.
+    unsafe { panic_impl(&pi) }
+ 69c:	0e 94 89 01 	call	0x312	; 0x312 <rust_begin_unwind>
+ 6a0:	0e 94 52 03 	call	0x6a4	; 0x6a4 <abort>
+
+000006a4 <abort>:
+ 6a4:	81 e0       	ldi	r24, 0x01	; 1
+ 6a6:	90 e0       	ldi	r25, 0x00	; 0
+ 6a8:	f8 94       	cli
+ 6aa:	0c 94 6e 03 	jmp	0x6dc	; 0x6dc <_exit>
+
+000006ae <exit>:
+ 6ae:	f8 94       	cli
+ 6b0:	0c 94 6e 03 	jmp	0x6dc	; 0x6dc <_exit>
+
+000006b4 <__udivmodhi4>:
+ 6b4:	aa 1b       	sub	r26, r26
+ 6b6:	bb 1b       	sub	r27, r27
+ 6b8:	51 e1       	ldi	r21, 0x11	; 17
+ 6ba:	07 c0       	rjmp	.+14     	; 0x6ca <__udivmodhi4_ep>
+
+000006bc <__udivmodhi4_loop>:
+ 6bc:	aa 1f       	adc	r26, r26
+ 6be:	bb 1f       	adc	r27, r27
+ 6c0:	a6 17       	cp	r26, r22
+ 6c2:	b7 07       	cpc	r27, r23
+ 6c4:	10 f0       	brcs	.+4      	; 0x6ca <__udivmodhi4_ep>
+ 6c6:	a6 1b       	sub	r26, r22
+ 6c8:	b7 0b       	sbc	r27, r23
+
+000006ca <__udivmodhi4_ep>:
+ 6ca:	88 1f       	adc	r24, r24
+ 6cc:	99 1f       	adc	r25, r25
+ 6ce:	5a 95       	dec	r21
+ 6d0:	a9 f7       	brne	.-22     	; 0x6bc <__udivmodhi4_loop>
+ 6d2:	80 95       	com	r24
+ 6d4:	90 95       	com	r25
+ 6d6:	bc 01       	movw	r22, r24
+ 6d8:	cd 01       	movw	r24, r26
+ 6da:	08 95       	ret
+
+000006dc <_exit>:
+ 6dc:	f8 94       	cli
+
+000006de <__stop_program>:
+ 6de:	ff cf       	rjmp	.-2      	; 0x6de <__stop_program>
