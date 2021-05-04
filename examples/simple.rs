@@ -9,11 +9,7 @@ use avr_hal_generic::port::{
     mode::Output,
     Pin,
 };
-use embedded_hal::spi::{
-    MODE_0,
-    Phase,
-    Polarity,
-};
+use embedded_hal::spi::MODE_0;
 use sdfat_rs::sdcard::SdCard;
 
 #[arduino_hal::entry]
@@ -30,7 +26,7 @@ fn main() -> ! {
         pins.d10.into_output(),
         spi::Settings {
             data_order: spi::DataOrder::MostSignificantFirst,
-            clock: spi::SerialClockRate::OscfOver128,
+            clock: spi::SerialClockRate::OscfOver64,
             mode: MODE_0,
         },
     );

@@ -8,6 +8,7 @@ edition = "2018"
 atmega328p = ["atmega-hal/atmega328p"]
 
 [dependencies]
+avr-progmem = "0.1.2"
 embedded-hal = "0.2.5"
 nb = "1.0.0"
 ufmt = "0.1.0"
