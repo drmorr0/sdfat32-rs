@@ -27,6 +27,7 @@ progmem! {
 
 const CRC7_BYTES: usize = 5;
 
+#[allow(non_snake_case)]
 pub fn CRC7(data: [u8; CRC7_BYTES]) -> u8 {
     let mut crc: u8 = 0;
     for i in 0..CRC7_BYTES {
