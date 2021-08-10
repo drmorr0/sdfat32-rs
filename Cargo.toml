@@ -10,6 +10,7 @@ atmega328p = ["atmega-hal/atmega328p", "avr-async/atmega328p"]
 [dependencies]
 avr-progmem = "0.1.2"
 embedded-hal = "0.2.5"
+gensym = "0.1.0"
 nb = "1.0.0"
 ufmt = "0.1.0"
 

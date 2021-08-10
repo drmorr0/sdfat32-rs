@@ -2,16 +2,13 @@ mod cardinfo;
 mod cmd;
 mod crc;
 mod init;
+mod rwdata;
 
-use atmega_hal::{
-    spi::{
-        ChipSelectPin,
-        Spi,
-    },
-    usart::Usart0,
+use atmega_hal::spi::{
+    ChipSelectPin,
+    Spi,
 };
 use avr_hal_generic::{
-    clock::MHz16,
     prelude::*,
     spi,
 };
@@ -19,26 +16,36 @@ use embedded_hal::spi::{
     FullDuplex,
     MODE_0,
 };
-use ufmt::{
-    derive::uDebug,
-    uwriteln,
-};
 
-enum SdVersion {
+#[derive(PartialEq, Eq)]
+enum DataMode {
+    Idle,
+    Read,
+    Write,
+}
+
+struct RwState {
+    mode: DataMode,
+    sector: u32,
+}
+
+pub enum SdVersion {
     One,
     Two { sdhc: bool },
 }
 
 pub struct SdCard<CSPIN: avr_hal_generic::port::PinOps> {
+    pub version: SdVersion,
+
     spi: Spi,
     cs_pin: ChipSelectPin<CSPIN>,
+    rw_state: RwState,
+
     millis: fn() -> u32,
-    version: SdVersion,
 }
 
-#[derive(Debug, uDebug)]
 pub enum SdCardError {
-    NoResponse,
+    NoResponse = 1,
     EraseReset,
     IllegalCommand,
     CRCError,
@@ -47,27 +54,27 @@ pub enum SdCardError {
     ParameterError,
     RegisterError,
     ReadError,
+    SDVersionOneUnsupported,
+    CardCheckPatternMismatch,
     Timeout,
     Unknown,
 }
 
 impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
-    pub fn new(
-        spi: Spi,
-        cs_pin: ChipSelectPin<CSPIN>,
-        millis: fn() -> u32,
-        serial: &mut Usart0<MHz16>,
-    ) -> SdCard<CSPIN> {
+    pub fn new(spi: Spi, cs_pin: ChipSelectPin<CSPIN>, millis: fn() -> u32) -> Result<SdCard<CSPIN>, SdCardError> {
         let mut sdcard = SdCard {
+            version: SdVersion::Two { sdhc: false },
+
             spi,
             cs_pin,
+            rw_state: RwState {
+                mode: DataMode::Idle,
+                sector: 0,
+            },
+
             millis,
-            version: SdVersion::Two { sdhc: false },
         };
 
-        uwriteln!(serial, "----------------").void_unwrap();
-        uwriteln!(serial, "Initializing SD card...").void_unwrap();
-        let start_time_ms = (sdcard.millis)();
         // Need to hold CS and MOSI high for at least 74 clock cycles;
         // each transfer takes 8 clock cycles so repeating for 10 times is sufficient
         sdcard.cs_pin.set_high().void_unwrap();
@@ -76,10 +83,10 @@ impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
         }
 
         sdcard.select();
-        sdcard.init_spi(serial);
-        sdcard.check_sd_version(serial);
-        sdcard.enable_crc(serial);
-        sdcard.check_and_enable_sdhc(serial);
+        sdcard.init_spi()?;
+        sdcard.check_sd_version()?;
+        sdcard.enable_crc()?;
+        sdcard.check_and_enable_sdhc()?;
         sdcard.unselect();
 
         // Once initialization is complete we can bump the SPI speed up to max
@@ -91,15 +98,7 @@ impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
         }))
         .void_unwrap();
 
-        uwriteln!(
-            serial,
-            "Initialization complete ({} ms)",
-            (sdcard.millis)() - start_time_ms,
-        )
-        .void_unwrap();
-        uwriteln!(serial, "----------------").void_unwrap();
-
-        sdcard
+        Ok(sdcard)
     }
 
     #[inline(always)]

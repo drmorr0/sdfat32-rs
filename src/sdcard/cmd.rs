@@ -7,6 +7,8 @@ use super::{
 #[derive(Clone, Copy)]
 pub(crate) enum SdCommand {
     GoIdleState = 0,
+    ReadStop = 12,
+    ReadMultipleBlocks = 18,
     AppCommand = 55,
     SetCRC = 59,
 }
@@ -103,13 +105,13 @@ impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
             Err(e) => return Err(e),
         }
 
-        let reg = self.read_data::<16>();
+        let mut data = [0u8; 16];
+        self.read_data(&mut data)?;
         self.unselect();
-        reg
+        Ok(data)
     }
 
-    fn read_data<const N: usize>(&mut self) -> Result<[u8; N], SdCardError> {
-        let mut data = [0; N];
+    pub(crate) fn read_data(&mut self, dest: &mut [u8]) -> Result<(), SdCardError> {
         let start_time_ms = (self.millis)();
 
         let mut res = self.transfer(0xff);
@@ -124,12 +126,12 @@ impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
             return Err(SdCardError::ReadError);
         }
 
-        for i in 0..N {
-            data[i] = self.transfer(0xff);
+        for i in 0..dest.len() {
+            dest[i] = self.transfer(0xff);
         }
 
         let _crc: u16 = ((self.transfer(0xff) as u16) << 8) | (self.transfer(0xff) as u16);
 
-        Ok(data)
+        Ok(())
     }
 }

@@ -3,6 +3,9 @@
 #![feature(llvm_asm)]
 #![feature(abi_avr_interrupt)]
 #![feature(panic_info_message)]
+#![allow(unreachable_code)]
+#![allow(dead_code)]
+#![allow(unused_imports)]
 
 use arduino_hal::{
     prelude::*,
@@ -21,9 +24,43 @@ use avr_hal_generic::port::{
     mode::Output,
     Pin,
 };
+use avr_progmem::progmem;
 use embedded_hal::spi::MODE_0;
-use sdfat_rs::sdcard::SdCard;
-use ufmt::uwriteln;
+use gensym::gensym;
+use sdfat_rs::{
+    fat32::mbr::MbrSector,
+    sdcard::{
+        SdCard,
+        SdVersion,
+    },
+};
+use ufmt::{
+    uwrite,
+    uwriteln,
+};
+
+macro_rules! pm_uwrite {
+    (&mut $io:ident, $fmt_str:literal, $pstr:literal ,$($y:expr)* $(,)?) => {
+        gensym!{ _pm_uwrite!{ &mut $io, $fmt_str, $pstr, $($y),* } };
+    };
+    ($io:ident, $fmt_str:literal, $pstr:literal $(,)?) => {
+        gensym!{ _pm_uwrite!{ $io, $fmt_str, $pstr, } };
+    };
+    ($io:ident, $fmt_str:literal, $pstr:literal, $($y:expr),+ $(,)?) => {
+        gensym!{ _pm_uwrite!{ $io, $fmt_str, $pstr, $($y),+ } };
+    };
+}
+
+macro_rules! _pm_uwrite {
+    ($gensym:ident, &mut $io:ident, $fmt_str:literal, $pstr:literal, $($y:expr),*) => {
+        progmem! { static progmem $gensym: &'static str = $pstr; }
+        uwrite!(&mut $io, $fmt_str, $gensym.load(), $($y),*).void_unwrap();
+    };
+    ($gensym:ident, $io:ident, $fmt_str:literal, $pstr:literal, $($y:expr),*) => {
+        progmem! { static progmem $gensym: &'static str = $pstr; }
+        uwrite!($io, $fmt_str, $gensym.load(), $($y),*).void_unwrap();
+    };
+}
 
 fn mid_lookup(mid: u8) -> &'static str {
     match mid {
@@ -46,7 +83,10 @@ fn mid_lookup(mid: u8) -> &'static str {
 
 #[arduino_hal::entry]
 fn main() -> ! {
-    let dp = arduino_hal::Peripherals::take().unwrap();
+    let dp = match arduino_hal::Peripherals::take() {
+        Some(p) => p,
+        None => panic!("Aborting"),
+    };
     let pins = arduino_hal::pins!(dp);
     let mut serial = arduino_hal::default_serial!(dp, pins, 57600);
     init_timers();
@@ -64,57 +104,116 @@ fn main() -> ! {
         },
     );
 
-    let mut sdcard = SdCard::new(spi, cs, millis, &mut serial);
+    let mut sdcard = match SdCard::new(spi, cs, millis) {
+        Ok(s) => s,
+        Err(e) => {
+            pm_uwrite!(
+                serial,
+                "{} {}\n",
+                "SdCard initialization failed with error code",
+                e as u8,
+            );
+            panic!("Aborting")
+        },
+    };
 
-    uwriteln!(serial, "CardInfo: ").void_unwrap();
+    pm_uwrite!(serial, "\n{}\n", "CardInfo:");
+    pm_uwrite!(
+        serial,
+        "{} {}\n",
+        "  SD Card version: ",
+        match sdcard.version {
+            SdVersion::One => "1.0",
+            SdVersion::Two { sdhc: true } => "2.0 (SDHC)",
+            SdVersion::Two { sdhc: false } => "2.0",
+        },
+    );
+
     match sdcard.read_card_id() {
         Ok(cid) => {
-            uwriteln!(
+            pm_uwrite!(
                 serial,
-                "  Manufacturer ID:  {} ({})",
+                "  {}  {} ({})\n",
+                "Manufacturer ID:",
                 mid_lookup(cid.manufacturer_id),
                 cid.manufacturer_id,
-            )
-            .void_unwrap();
-            uwriteln!(serial, "  OEM ID:           {}{}", cid.oem_id.0, cid.oem_id.1).void_unwrap();
-            uwriteln!(
+            );
+            pm_uwrite!(serial, "  {}           {}{}\n", "OEM ID:", cid.oem_id.0, cid.oem_id.1);
+            pm_uwrite!(serial, "  {}     ", "Product name:");
+            for i in 0..5 {
+                uwrite!(serial, "{}", cid.product_name[i]).void_unwrap();
+            }
+            uwrite!(serial, "\n").void_unwrap();
+            pm_uwrite!(
                 serial,
-                "  Product Name:     {}{}{}{}{}",
-                cid.product_name.0,
-                cid.product_name.1,
-                cid.product_name.2,
-                cid.product_name.3,
-                cid.product_name.4
-            )
-            .void_unwrap();
-            uwriteln!(
-                serial,
-                "  Product revision: {}.{}",
+                "  {} {}.{}\n",
+                "Product revision:",
                 cid.product_revision.0,
                 cid.product_revision.1,
-            )
-            .void_unwrap();
-            uwriteln!(
+            );
+            pm_uwrite!(
                 serial,
-                "  Serial number:    {}{}",
+                "  {}    {}{}\n",
+                "Serial number:",
                 (cid.product_serial_num >> 16),
-                cid.product_serial_num
-            )
-            .void_unwrap();
-            uwriteln!(
+                cid.product_serial_num,
+            );
+            pm_uwrite!(
                 serial,
-                "  Manufacture date: {}-{}",
+                "  {} {}-{}\n",
+                "Manufacture date:",
                 cid.manufacturing_date_year,
                 cid.manufacturing_date_month,
-            )
-            .void_unwrap();
+            );
         },
         Err(e) => {
-            uwriteln!(serial, "couldn't read CID register: {:?}", e).void_unwrap();
+            pm_uwrite!(serial, "{} {}\n", "couldn't read CID register:", e as u8);
+            panic!("Aborting...");
+        },
+    }
+    pm_uwrite!(serial, "\n{}\n", "Card-specific data:");
+    match sdcard.read_card_specific_data() {
+        Ok(csd) => {
+            pm_uwrite!(serial, "  {}               {}\n", "CSD version:", csd.version);
+            pm_uwrite!(
+                serial,
+                "  {}    {} MHz\n",
+                "Max data transfer rate:",
+                csd.tran_speed_mhz,
+            );
+            pm_uwrite!(serial, "  {} ", "Supported command classes:");
+            for i in 0..12 {
+                uwrite!(serial, "{}", (csd.supported_command_classes >> (11 - i)) & 0x01).void_unwrap();
+            }
+            uwrite!(serial, "\n").void_unwrap();
+            pm_uwrite!(
+                serial,
+                "  {}  {} bytes\n",
+                "Max data read block size:",
+                csd.max_read_block_len_bytes,
+            );
+            pm_uwrite!(serial, "  {}             {} MiB\n", "Card capacity:", csd.capacity_mib);
+        },
+        Err(e) => {
+            pm_uwrite!(serial, "{} {}\n", "couldn't read CSD register:", e as u8);
             panic!("Aborting...");
         },
     }
 
+    // let mut mbr: MbrSector = MbrSector::new();
+    // let raw_mbr = unsafe { core::slice::from_raw_parts_mut((&mut mbr as *mut MbrSector) as *mut u8,
+    // 512) }; if let Err(e) = sdcard.read_sectors(0, raw_mbr) {
+    //     panic!("Could not read MBR");
+    // }
+
+    let mut raw_mbr = [0u8; 512];
+    if let Err(e) = sdcard.read_sectors(0, &mut raw_mbr) {
+        panic!("Could not read MBR");
+    }
+
+    // for i in 0..512 {
+    //     uwriteln!(serial, "data[{}] = {}", i, raw_mbr[i]).void_unwrap();
+    // }
     loop {}
 }
 
@@ -126,7 +225,7 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
     uwriteln!(&mut serial, "Firmware panic!\r").void_unwrap();
 
     if let Some(loc) = info.location() {
-        uwriteln!(&mut serial, "  At {}:{}:{}\r", loc.file(), loc.line(), loc.column(),).void_unwrap();
+        uwriteln!(&mut serial, "  At {}:{}:{}\r", loc.file(), loc.line(), loc.column()).void_unwrap();
     }
     if let Some(message_args) = info.message() {
         if let Some(message) = message_args.as_str() {
