@@ -1,0 +1,17 @@
+[package]
+name = "avr-progmem-str"
+version = "0.1.0"
+authors = ["David Morrison <drmorr@evokewonder.com>"]
+edition = "2018"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "*"
+quote = "1.0.9"
+syn = "1.0.75"
+
+[dependencies.uuid]
+version = "0.8.2"
+features = ["v4"]

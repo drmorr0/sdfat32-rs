@@ -1,0 +1,56 @@
+[package]
+name = "sdfat32-rs-examples"
+version = "0.0.0"
+authors = ["David Morrison <drmorr@evokewonder.com>"]
+edition = "2018"
+
+[[bin]]
+name = "sdinfo"
+path = "src/sdinfo.rs"
+
+[features]
+atmega328p = ["atmega-hal/atmega328p", "avr-async/atmega328p"]
+
+[dependencies.avr-async]
+git = "https://github.com/drmorr0/avr-async"
+
+[dependencies]
+avr-progmem = "*"
+embedded-hal = "0.2.5"
+ufmt = "*"
+
+[dependencies.sdfat32-rs]
+path = "../sdfat32-rs"
+
+[dependencies.avr-progmem-str]
+path = "../macros"
+
+[dependencies.atmega-hal]
+git = "https://github.com/Rahix/avr-hal"
+branch = "next"
+
+[dependencies.avr-hal-generic]
+git = "https://github.com/Rahix/avr-hal"
+branch = "next"
+
+[dependencies.void]
+version = "1"
+default-features = false
+
+[dependencies.arduino-hal]
+git = "https://github.com/Rahix/avr-hal"
+branch = "next"
+features = ["arduino-uno"]
+
+# Configure the build for minimal size
+[profile.dev]
+panic = "abort"
+lto = true
+opt-level = "s"
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+debug = true
+lto = true
+opt-level = "s"
