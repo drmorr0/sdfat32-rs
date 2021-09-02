@@ -6,6 +6,9 @@
 #![allow(unreachable_code)]
 #![allow(dead_code)]
 #![allow(unused_imports)]
+#![allow(deprecated)] // llvm_asm!
+
+mod strings;
 
 use arduino_hal::{
     prelude::*,
@@ -24,14 +27,13 @@ use avr_hal_generic::port::{
     mode::Output,
     Pin,
 };
-use avr_progmem;
 use avr_progmem_str::{
     pm_write,
     progmem_str,
 };
 use embedded_hal::spi::MODE_0;
 use sdfat32_rs::{
-    fat32::mbr::MbrSector,
+    fat32,
     sdcard::{
         SdCard,
         SdVersion,
@@ -41,25 +43,6 @@ use ufmt::{
     uwrite,
     uwriteln,
 };
-
-fn mid_lookup(mid: u8) -> &'static str {
-    match mid {
-        0x01 => "Panasonic",
-        0x02 => "Toshiba",
-        0x03 => "SanDisk",
-        0x1b => "Samsung",
-        0x1d => "AData",
-        0x27 => "Phison",
-        0x28 => "Lexar",
-        0x31 => "Silicon Power",
-        0x41 => "Kingston",
-        0x74 => "Transcend",
-        0x76 => "Patriot",
-        0x82 => "Sony",
-        0x9c => "Angelbird",
-        _ => "Unknown",
-    }
-}
 
 #[arduino_hal::entry]
 fn main() -> ! {
@@ -102,18 +85,15 @@ fn main() -> ! {
 
     match sdcard.read_card_id() {
         Ok(cid) => {
-            pm_write!(
-                serial,
-                "  Manufacturer ID:  {} ({})\n",
-                mid_lookup(cid.manufacturer_id),
-                cid.manufacturer_id,
-            );
+            pm_write!(serial, "  Manufacturer ID:  ");
+            strings::mid_write(&mut serial, cid.manufacturer_id);
+            serial.write_char('\n').unwrap();
             pm_write!(serial, "  OEM ID:           {}{}\n", cid.oem_id.0, cid.oem_id.1);
             pm_write!(serial, "  Product name:     ");
             for i in 0..5 {
-                uwrite!(serial, "{}", cid.product_name[i]).void_unwrap();
+                serial.write_char(cid.product_name[i]).unwrap();
             }
-            uwrite!(serial, "\n").void_unwrap();
+            serial.write_char('\n').unwrap();
             pm_write!(
                 serial,
                 "  Product revision: {}.{}\n",
@@ -147,7 +127,7 @@ fn main() -> ! {
             for i in 0..12 {
                 uwrite!(serial, "{}", (csd.supported_command_classes >> (11 - i)) & 0x01).void_unwrap();
             }
-            uwrite!(serial, "\n").void_unwrap();
+            serial.write_char('\n').unwrap();
             pm_write!(
                 serial,
                 "  Max data read block size:  {}\n",
@@ -161,41 +141,59 @@ fn main() -> ! {
         },
     }
 
-    // let mut mbr: MbrSector = MbrSector::new();
-    // let raw_mbr = unsafe { core::slice::from_raw_parts_mut((&mut mbr as *mut MbrSector) as *mut u8,
-    // 512) }; if let Err(e) = sdcard.read_sectors(0, raw_mbr) {
-    //     panic!("Could not read MBR");
-    // }
-
-    let mut raw_mbr = [0u8; 512];
-    if let Err(e) = sdcard.read_sectors(0, &mut raw_mbr) {
-        panic!("Could not read MBR");
+    pm_write!(serial, "\nMaster Boot Record:\n");
+    let mut mbr = fat32::Mbr::new();
+    match mbr.read(&mut sdcard) {
+        Ok(()) => {
+            for (i, partition) in mbr.partitions.iter().enumerate() {
+                pm_write!(
+                    serial,
+                    "  Partition {}: is_boot = {}; partition_type = ",
+                    i,
+                    partition.boot,
+                );
+                strings::ptype_write(&mut serial, partition.ptype);
+                pm_write!(
+                    serial,
+                    "; begin_chs = {}/{}/{}; end_chs = {}/{}/{}; start_sector = {}, length = {},\n",
+                    partition.begin_chs[0],
+                    partition.begin_chs[1],
+                    partition.begin_chs[2],
+                    partition.end_chs[0],
+                    partition.end_chs[1],
+                    partition.end_chs[2],
+                    partition.start_sector,
+                    partition.total_sectors,
+                );
+            }
+        },
+        Err(e) => {
+            pm_write!(serial, "Couldn't read MBR: {}\n", e as u8);
+            panic!("Aborting...");
+        },
     }
 
-    // for i in 0..512 {
-    //     pm_writeln!(serial, "data[{}] = {}", i, raw_mbr[i]).void_unwrap();
-    // }
+    pm_write!(serial, "\nPartition 0:\n");
+    match fat32::Partition::read(&mut sdcard, &mbr.partitions[0]) {
+        Ok(part) => {
+            pm_write!(serial, "  sectors per cluster: {}\n", part.sectors_per_cluster);
+            pm_write!(serial, "  cluster count:       {}\n", part.cluster_count);
+            pm_write!(serial, "  fat start sector:    {}\n", part.fat_start_sector);
+        },
+        Err(e) => {
+            pm_write!(serial, "Couldn't read partition: {}\n", e as u8);
+            panic!("Aborting...");
+        },
+    }
+
     loop {}
 }
 
 #[panic_handler]
-fn panic(info: &core::panic::PanicInfo) -> ! {
+fn panic(_: &core::panic::PanicInfo) -> ! {
     let mut led: Pin<Output, PB5> = unsafe { core::mem::MaybeUninit::uninit().assume_init() };
     let mut serial: Usart0<MHz16> = unsafe { core::mem::MaybeUninit::uninit().assume_init() };
-    unsafe {
-        let sp_high: u16 = *(0x5E as *const u16);
-        let sp_low: u16 = *(0x5D as *const u16);
-        uwriteln!(&mut serial, "Firmware panic!  SP = {} {}\r", sp_high, sp_low).void_unwrap();
-    }
-
-    if let Some(loc) = info.location() {
-        uwriteln!(&mut serial, "  At {}:{}:{}\r", loc.file(), loc.line(), loc.column()).void_unwrap();
-    }
-    if let Some(message_args) = info.message() {
-        if let Some(message) = message_args.as_str() {
-            uwriteln!(&mut serial, "    {}\r", message).void_unwrap();
-        }
-    }
+    let _ = serial.write_str("panic!\r"); // Ignore failures because we're already panicking...
 
     loop {
         led.set_high();

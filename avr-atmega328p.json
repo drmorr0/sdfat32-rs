@@ -9,7 +9,6 @@
   "linker-is-gnu": true,
   "llvm-target": "avr-unknown-unknown",
   "no-builtins": true,
-  "no-compiler-rt": true,
   "os": "unknown",
   "position-independent-executables": false,
   "exe-suffix": ".elf",

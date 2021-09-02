@@ -13,6 +13,7 @@ atmega328p = ["atmega-hal/atmega328p", "avr-async/atmega328p"]
 
 [dependencies.avr-async]
 git = "https://github.com/drmorr0/avr-async"
+features = ["atmega328p"]
 
 [dependencies]
 avr-progmem = "*"
@@ -41,16 +42,3 @@ default-features = false
 git = "https://github.com/Rahix/avr-hal"
 branch = "next"
 features = ["arduino-uno"]
-
-# Configure the build for minimal size
-[profile.dev]
-panic = "abort"
-lto = true
-opt-level = "s"
-
-[profile.release]
-panic = "abort"
-codegen-units = 1
-debug = true
-lto = true
-opt-level = "s"

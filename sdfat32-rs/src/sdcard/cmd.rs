@@ -42,7 +42,7 @@ impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
 
     pub(crate) fn send_card_command(&mut self, cmd: SdCommand, arg: u32) -> Result<(), SdCardError> {
         match self.send_card_command_helper(cmd as u8, arg) {
-            Ok(0x01) => Ok(()),
+            Ok(b) if b == 0x0 || b == 0x1 => Ok(()),
             Ok(b) if b & 0x02 != 0 => Err(SdCardError::EraseReset),
             Ok(b) if b & 0x04 != 0 => Err(SdCardError::IllegalCommand),
             Ok(b) if b & 0x08 != 0 => Err(SdCardError::CRCError),
