@@ -121,6 +121,5 @@ pub fn pm_write(input: TokenStream) -> TokenStream {
     let output = quote! {
         #(#chunks)*
     };
-    println!("{}", output);
     TokenStream::from(output)
 }
