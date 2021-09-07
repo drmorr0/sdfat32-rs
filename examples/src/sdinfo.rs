@@ -3,12 +3,7 @@
 #![feature(llvm_asm)]
 #![feature(abi_avr_interrupt)]
 #![feature(panic_info_message)]
-#![allow(unreachable_code)]
-#![allow(dead_code)]
-#![allow(unused_imports)]
 #![allow(deprecated)] // llvm_asm!
-
-mod strings;
 
 use arduino_hal::{
     prelude::*,
@@ -39,16 +34,13 @@ use sdfat32_rs::{
         SdVersion,
     },
 };
-use ufmt::{
-    uwrite,
-    uwriteln,
-};
+use ufmt::uwrite;
 
 #[arduino_hal::entry]
 fn main() -> ! {
     let dp = match arduino_hal::Peripherals::take() {
         Some(p) => p,
-        None => panic!("Aborting"),
+        None => panic!(""),
     };
     let pins = arduino_hal::pins!(dp);
     let mut serial = arduino_hal::default_serial!(dp, pins, 57600);
@@ -67,122 +59,60 @@ fn main() -> ! {
         },
     );
 
-    let mut sdcard = match SdCard::new(spi, cs, millis) {
+    let sdcard = match SdCard::new(spi, cs, millis) {
         Ok(s) => s,
         Err(e) => {
-            pm_write!(serial, "SdCard initialization failed with error code {}\n", e as u8);
-            panic!("Aborting")
+            pm_write!(serial, "SdCard initialization failed with error code {}\n", e as u8).void_unwrap();
+            panic!("")
         },
     };
 
-    pm_write!(serial, "\nCardInfo:\n");
-    let version_str = match sdcard.version {
+    pm_write!(serial, "\nCardInfo:\n").void_unwrap();
+    let version_str = match sdcard.borrow().version {
         SdVersion::One => "1.0",
         SdVersion::Two { sdhc: true } => "2.0 (SDHC)",
         SdVersion::Two { sdhc: false } => "2.0",
     };
-    pm_write!(serial, "  SD Card Version:  {}\n", version_str);
+    pm_write!(serial, "  SD Card Version:  {}\n", version_str).void_unwrap();
 
-    match sdcard.read_card_id() {
-        Ok(cid) => {
-            pm_write!(serial, "  Manufacturer ID:  ");
-            strings::mid_write(&mut serial, cid.manufacturer_id);
-            serial.write_char('\n').unwrap();
-            pm_write!(serial, "  OEM ID:           {}{}\n", cid.oem_id.0, cid.oem_id.1);
-            pm_write!(serial, "  Product name:     ");
-            for i in 0..5 {
-                serial.write_char(cid.product_name[i]).unwrap();
-            }
-            serial.write_char('\n').unwrap();
-            pm_write!(
-                serial,
-                "  Product revision: {}.{}\n",
-                cid.product_revision.0,
-                cid.product_revision.1,
-            );
-            pm_write!(
-                serial,
-                "  Serial number:    {}{}\n",
-                (cid.product_serial_num >> 16),
-                cid.product_serial_num,
-            );
-            pm_write!(
-                serial,
-                "  Manufacture date: {}-{}\n",
-                cid.manufacturing_date_year,
-                cid.manufacturing_date_month,
-            );
-        },
+    match sdcard.borrow_mut().read_card_id() {
+        Ok(cid) => uwrite!(serial, "{:?}", cid).void_unwrap(),
         Err(e) => {
-            pm_write!(serial, "couldn't read CID register: {}\n", e as u8);
-            panic!("Aborting...");
+            pm_write!(serial, "couldn't read CID register: {}\n", e as u8).void_unwrap();
+            panic!("");
         },
     }
-    pm_write!(serial, "\nCard-specific data:\n");
-    match sdcard.read_card_specific_data() {
-        Ok(csd) => {
-            pm_write!(serial, "  CSD version:               {}\n", csd.version);
-            pm_write!(serial, "  Max data transfer rate:    {} MHz\n", csd.tran_speed_mhz);
-            pm_write!(serial, "  Supported command classes: ");
-            for i in 0..12 {
-                uwrite!(serial, "{}", (csd.supported_command_classes >> (11 - i)) & 0x01).void_unwrap();
-            }
-            serial.write_char('\n').unwrap();
-            pm_write!(
-                serial,
-                "  Max data read block size:  {}\n",
-                csd.max_read_block_len_bytes,
-            );
-            pm_write!(serial, "  Card capacity:             {} MiB\n", csd.capacity_mib);
-        },
+    pm_write!(serial, "\nCard-specific data:\n").void_unwrap();
+    match sdcard.borrow_mut().read_card_specific_data() {
+        Ok(csd) => uwrite!(serial, "{:?}", csd).void_unwrap(),
         Err(e) => {
-            pm_write!(serial, "couldn't read CSD register: {}\n", e as u8);
-            panic!("Aborting...");
+            pm_write!(serial, "couldn't read CSD register: {}\n", e as u8).void_unwrap();
+            panic!("");
         },
     }
 
-    pm_write!(serial, "\nMaster Boot Record:\n");
-    let mut mbr = fat32::Mbr::new();
-    match mbr.read(&mut sdcard) {
-        Ok(()) => {
-            for (i, partition) in mbr.partitions.iter().enumerate() {
-                pm_write!(
-                    serial,
-                    "  Partition {}: is_boot = {}; partition_type = ",
-                    i,
-                    partition.boot,
-                );
-                strings::ptype_write(&mut serial, partition.ptype);
-                pm_write!(
-                    serial,
-                    "; begin_chs = {}/{}/{}; end_chs = {}/{}/{}; start_sector = {}, length = {},\n",
-                    partition.begin_chs[0],
-                    partition.begin_chs[1],
-                    partition.begin_chs[2],
-                    partition.end_chs[0],
-                    partition.end_chs[1],
-                    partition.end_chs[2],
-                    partition.start_sector,
-                    partition.total_sectors,
-                );
+    pm_write!(serial, "\nMaster Boot Record:\n").void_unwrap();
+    match fat32::Mbr::read_part_info(&sdcard) {
+        Ok(part_info) => {
+            for (i, part_info) in part_info.iter().enumerate() {
+                pm_write!(serial, "  Partition {}", i).void_unwrap();
+                uwrite!(serial, "{:?}", part_info).void_unwrap();
             }
-        },
-        Err(e) => {
-            pm_write!(serial, "Couldn't read MBR: {}\n", e as u8);
-            panic!("Aborting...");
-        },
-    }
 
-    pm_write!(serial, "\nPartition 0:\n");
-    match fat32::Partition::read(&mut sdcard, &mbr.partitions[0]) {
-        Ok(part) => {
-            pm_write!(serial, "  sectors per cluster: {}\n", part.sectors_per_cluster);
-            pm_write!(serial, "  cluster count:       {}\n", part.cluster_count);
-            pm_write!(serial, "  fat start sector:    {}\n", part.fat_start_sector);
+            pm_write!(serial, "\nPartition 0:\n").void_unwrap();
+            match fat32::Volume::read(&sdcard, &part_info[0]) {
+                Ok(vol) => {
+                    uwrite!(serial, "{:?}", vol.partition).void_unwrap();
+                },
+                Err(e) => {
+                    pm_write!(serial, "Couldn't read volume: {}\n", e as u8).void_unwrap();
+                    panic!("");
+                },
+            };
         },
         Err(e) => {
-            pm_write!(serial, "Couldn't read partition: {}\n", e as u8);
-            panic!("Aborting...");
+            pm_write!(serial, "Couldn't read MBR: {}\n", e as u8).unwrap();
+            panic!("");
         },
     }
 

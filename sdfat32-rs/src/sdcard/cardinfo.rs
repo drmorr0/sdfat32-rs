@@ -6,8 +6,8 @@ use super::{
 
 pub struct CardId {
     pub manufacturer_id: u8,
-    pub oem_id: (char, char),
-    pub product_name: [char; 5],
+    pub oem_id: (u8, u8),
+    pub product_name: [u8; 5],
     pub product_revision: (u8, u8),
     pub product_serial_num: u32,
     pub manufacturing_date_year: u16,
@@ -27,14 +27,8 @@ impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
         let data = self.read_register(SdRegister::CID)?;
         Ok(CardId {
             manufacturer_id: data[0],
-            oem_id: (data[1] as char, data[2] as char),
-            product_name: [
-                data[3] as char,
-                data[4] as char,
-                data[5] as char,
-                data[6] as char,
-                data[7] as char,
-            ],
+            oem_id: (data[1], data[2]),
+            product_name: [data[3], data[4], data[5], data[6], data[7]],
             product_revision: (data[8] & 0xf0, data[8] & 0x0f),
             product_serial_num: (data[9] as u32) << 24
                 | (data[10] as u32) << 16

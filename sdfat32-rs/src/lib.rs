@@ -1,5 +1,7 @@
 #![no_std]
-#![allow(dead_code)]
+#![feature(llvm_asm)]
+#![allow(deprecated)] // llvm_asm!
 
 pub mod fat32;
+pub mod hexfmt;
 pub mod sdcard;

@@ -2,6 +2,7 @@
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
+use proc_macro2::TokenStream as TokenStream2;
 use quote::{
     format_ident,
     quote,
@@ -75,7 +76,7 @@ impl Parse for ProgmemStrWrite {
         let io = input.parse()?;
         input.parse::<Token![,]>()?;
         let fmt_str = input.parse()?;
-        input.parse::<Token![,]>();
+        input.parse::<Token![,]>().ok();
         let args = input.parse_terminated(Expr::parse)?;
 
         Ok(ProgmemStrWrite { io, fmt_str, args })
@@ -87,39 +88,45 @@ pub fn pm_write(input: TokenStream) -> TokenStream {
     let ProgmemStrWrite { io, fmt_str, args } = parse_macro_input!(input as ProgmemStrWrite);
 
     let mut args_iter = args.iter();
-    let chunks: Vec<proc_macro2::TokenStream> = fmt_str
-        .value()
-        .split("{}")
-        .map(|chunk| {
-            let chunk_len = chunk.len();
-            let mut val = if chunk_len <= 3 || chunk.trim().is_empty() {
-                quote! { #io.write_str(#chunk).unwrap(); }
-            } else {
-                let ident = format_ident!("STR_{}", Uuid::new_v4().to_simple().to_string());
-                quote! {
-                    progmem_str! {
-                        static progmem #ident: &'static str = #chunk;
-                    }
-                    for i in 0..#chunk_len {
-                        let p_addr: *const u8 = core::ptr::addr_of!(#ident[i]);
-                        let res: u8;
-                        unsafe {
-                            llvm_asm!("lpm" : "={r0}"(res) : "z"(p_addr));
-                        }
-                        #io.write_char(res as char).unwrap();
-                    }
+    let mut var_defs: Vec<TokenStream2> = vec![];
+    let mut wexprs: Vec<TokenStream2> = vec![];
+    for chunk in fmt_str.value().split("{}") {
+        let chunk_len = chunk.len();
+        if chunk_len <= 3 || chunk.trim().is_empty() {
+            wexprs.push(quote! { f.write_str(#chunk)?; });
+        } else {
+            let ident = format_ident!("STR_{}", Uuid::new_v4().to_simple().to_string());
+            var_defs.push(quote! {
+                progmem_str! {
+                    static progmem #ident: &'static str = #chunk;
                 }
-            };
-            if let Some(a) = args_iter.next() {
-                val.extend_one(quote! {
-                    ufmt::uwrite!(#io, "{}", #a).void_unwrap();
-                })
-            }
-            val
-        })
-        .collect();
+            });
+            wexprs.push(quote! {
+                for i in 0..#chunk_len {
+                    let p_addr: *const u8 = core::ptr::addr_of!(#ident[i]);
+                    let res: u8;
+                    unsafe {
+                        llvm_asm!("lpm" : "={r0}"(res) : "z"(p_addr));
+                    }
+                    f.write_char(res as char)?;
+                }
+            });
+        }
+        if let Some(a) = args_iter.next() {
+            wexprs.push(quote! {
+                ufmt::uDisplay::fmt(&(#a), f)?;
+            });
+        }
+    }
+
     let output = quote! {
-        #(#chunks)*
+        {use ufmt::UnstableDoAsFormatter as _;
+
+        #io.do_as_formatter(|f| {
+            #(#var_defs)*
+            #(#wexprs)*
+            Ok(())
+        })}
     };
     TokenStream::from(output)
 }

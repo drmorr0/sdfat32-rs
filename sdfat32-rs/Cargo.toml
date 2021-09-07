@@ -11,6 +11,7 @@ atmega328p = ["atmega-hal/atmega328p", "avr-async/atmega328p"]
 avr-progmem = "0.1.2"
 embedded-hal = "0.2.5"
 nb = "1.0.0"
+ufmt = "0.1.0"
 
 [dependencies.avr-async]
 git = "https://github.com/drmorr0/avr-async"
@@ -27,15 +28,5 @@ branch = "next"
 version = "1"
 default-features = false
 
-# Configure the build for minimal size
-[profile.dev]
-panic = "abort"
-lto = true
-opt-level = "s"
-
-[profile.release]
-panic = "abort"
-codegen-units = 1
-debug = true
-lto = true
-opt-level = "s"
+[dependencies.avr-progmem-str]
+path = "../macros"

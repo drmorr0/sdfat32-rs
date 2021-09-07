@@ -1,6 +1,7 @@
 mod cardinfo;
 mod cmd;
 mod crc;
+mod debug;
 mod init;
 mod rwdata;
 
@@ -12,6 +13,7 @@ use avr_hal_generic::{
     prelude::*,
     spi,
 };
+use core::cell::RefCell;
 use embedded_hal::spi::{
     FullDuplex,
     MODE_0,
@@ -61,7 +63,11 @@ pub enum SdCardError {
 }
 
 impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
-    pub fn new(spi: Spi, cs_pin: ChipSelectPin<CSPIN>, millis: fn() -> u32) -> Result<SdCard<CSPIN>, SdCardError> {
+    pub fn new(
+        spi: Spi,
+        cs_pin: ChipSelectPin<CSPIN>,
+        millis: fn() -> u32,
+    ) -> Result<RefCell<SdCard<CSPIN>>, SdCardError> {
         let mut sdcard = SdCard {
             version: SdVersion::Two { sdhc: false },
 
@@ -98,7 +104,7 @@ impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
         }))
         .void_unwrap();
 
-        Ok(sdcard)
+        Ok(RefCell::new(sdcard))
     }
 
     #[inline(always)]
