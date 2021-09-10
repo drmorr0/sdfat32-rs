@@ -8,6 +8,10 @@ edition = "2018"
 name = "sdinfo"
 path = "src/sdinfo.rs"
 
+[[bin]]
+name = "sdls"
+path = "src/sdls.rs"
+
 [features]
 atmega328p = ["atmega-hal/atmega328p", "avr-async/atmega328p"]
 

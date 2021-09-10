@@ -3,7 +3,11 @@ use super::{
     FatError,
 };
 use crate::sdcard::SdCard;
-use core::cell::RefCell;
+use avr_hal_generic::port::PinOps;
+use core::{
+    cell::RefCell,
+    convert::TryInto,
+};
 
 const LOG2_BYTES_PER_SECTOR: u8 = 9;
 const BYTES_PER_SECTOR: u16 = 512;
@@ -93,7 +97,7 @@ pub struct Partition {
 }
 
 impl Partition {
-    pub(crate) fn read<CSPIN: avr_hal_generic::port::PinOps>(
+    pub(crate) fn read<CSPIN: PinOps>(
         sdcard: &RefCell<SdCard<CSPIN>>,
         partition_info: &mbr::PartitionInfo,
     ) -> Result<Partition, FatError> {
@@ -131,7 +135,7 @@ impl Partition {
         data_cluster_count >>= log2_sectors_per_cluster;
 
         if data_cluster_count < 65525 {
-            return Err(FatError::Unsupported);
+            return Err(FatError::UnsupportedVersion);
         }
 
         Ok(Partition {
@@ -148,6 +152,40 @@ impl Partition {
         })
     }
 
+    pub(crate) fn fat_get_next_cluster<CSPIN: PinOps>(
+        &self,
+        sdcard: &RefCell<SdCard<CSPIN>>,
+        cluster: u32,
+    ) -> Result<u32, FatError> {
+        if cluster < 2 || cluster > self.last_cluster() {
+            return Err(FatError::InvalidCluster);
+        }
+
+        // Each sector (512 bytes) contains 128 cluster entries since FAT32 entries are 4 bytes
+        // long.  So here we divide by 512 / 4 to get the sector index that we're interested in.
+        let fat_sector_to_get = self.fat_start_sector + (cluster >> (LOG2_BYTES_PER_SECTOR - 2));
+
+        // TODO implement caching for faster lookups
+        let mut fat_sector_data = [0u8; BYTES_PER_SECTOR as usize];
+        sdcard
+            .borrow_mut()
+            .read_sectors(fat_sector_to_get, &mut fat_sector_data)?;
+
+        let idx = (cluster & ((self.cluster_sector_mask >> 2) as u32)) as usize;
+        let sector_bytes_for_cluster = match fat_sector_data[idx..idx + 4].try_into() {
+            Ok(val) => val,
+            Err(_) => return Err(FatError::CorruptFat),
+        };
+
+        Ok(u32::from_le_bytes(sector_bytes_for_cluster))
+    }
+
+    #[inline(always)]
+    pub(crate) fn last_cluster(&self) -> u32 {
+        self.data_cluster_count + 1
+    }
+
+    #[inline(always)]
     pub(crate) fn log2_bytes_per_cluster(&self) -> u8 {
         // Operating in log space so multiplication becomes addition
         self.log2_sectors_per_cluster + LOG2_BYTES_PER_SECTOR

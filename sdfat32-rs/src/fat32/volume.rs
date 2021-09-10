@@ -7,15 +7,16 @@ use crate::{
     },
     sdcard::SdCard,
 };
+use avr_hal_generic::port::PinOps;
 use core::cell::RefCell;
 
 pub struct Volume {
-    cwd: File,
+    pub cwd: File,
     pub partition: Partition,
 }
 
 impl Volume {
-    pub fn read<CSPIN: avr_hal_generic::port::PinOps>(
+    pub fn read<CSPIN: PinOps>(
         sdcard: &RefCell<SdCard<CSPIN>>,
         part_info: &mbr::PartitionInfo,
     ) -> Result<Volume, FatError> {
@@ -29,9 +30,22 @@ impl Volume {
         })
     }
 
-    pub fn ls() {}
+    pub fn ls<CSPIN: PinOps>(&self, sdcard: &RefCell<SdCard<CSPIN>>, file: &mut File) -> Result<(), FatError> {
+        if !file.is_directory() {
+            return Err(FatError::NotADirectory);
+        }
+        self.seek_file(sdcard, file, 0);
+        Ok(())
+    }
 
-    pub fn seek_file(&self, file: &mut File, pos: u32) -> Result<(), FatError> {
+    pub fn open_file<CSPIN: PinOps>(&self, sdcard: &RefCell<SdCard<CSPIN>>, path: &str) -> Result<File, FatError> {}
+
+    pub fn seek_file<CSPIN: PinOps>(
+        &self,
+        sdcard: &RefCell<SdCard<CSPIN>>,
+        file: &mut File,
+        pos: u32,
+    ) -> Result<(), FatError> {
         let current_pos_old = file.current_pos;
         match (|| {
             if !file.is_open() {
@@ -59,8 +73,8 @@ impl Volume {
                 cluster_idx_new -= cluster_idx_cur;
             }
 
-            while cluster_idx_new > 0 {
-                //                self.partition.fat_get(file.current_cluster)?;
+            for _ in 0..cluster_idx_new {
+                file.current_cluster = self.partition.fat_get_next_cluster(sdcard, file.current_cluster)?;
             }
             Ok(())
         })() {

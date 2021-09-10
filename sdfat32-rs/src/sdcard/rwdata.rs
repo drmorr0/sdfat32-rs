@@ -4,10 +4,11 @@ use super::{
     SdCard,
     SdCardError,
 };
+use avr_hal_generic::port::PinOps;
 
 const READ_BLOCK_SIZE_V2: usize = 512;
 
-impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
+impl<CSPIN: PinOps> SdCard<CSPIN> {
     pub fn read_sectors(&mut self, start_sector: u32, data: &mut [u8]) -> Result<(), SdCardError> {
         if self.rw_state.mode != DataMode::Read || self.rw_state.sector != start_sector {
             self.select();

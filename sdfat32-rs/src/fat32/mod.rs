@@ -4,16 +4,27 @@ pub mod mbr;
 pub mod partition;
 pub mod volume;
 
+use crate::sdcard::SdCardError;
 pub use file::File;
 pub use mbr::Mbr;
 pub use volume::Volume;
 
 pub enum FatError {
-    CorruptMBR = 1,
+    BlockDeviceFailed = 1,
+    CorruptMBR,
     BadPartitionNumber,
     CorruptPartition,
-    Unsupported,
     FileClosed,
     SeekError,
+    InvalidCluster,
+    CorruptFat,
+    NotADirectory,
+    UnsupportedVersion,
     Unknown,
+}
+
+impl From<SdCardError> for FatError {
+    fn from(_: SdCardError) -> FatError {
+        FatError::BlockDeviceFailed
+    }
 }

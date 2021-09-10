@@ -69,36 +69,36 @@ impl uDebug for CardId {
         W: uWrite + ?Sized,
     {
         pm_write!(out, "  Manufacturer ID:  ")?;
-        mid_write(out, self.manufacturer_id)?;
+        mid_write(out, self.manufacturer_id())?;
         out.write_char('\n')?;
         pm_write!(
             out,
             "  OEM ID:           {}{}\n",
-            self.oem_id.0 as char,
-            self.oem_id.1 as char
+            self.oem_id().0 as char,
+            self.oem_id().1 as char
         )?;
         pm_write!(out, "  Product name:     ")?;
         for i in 0..5 {
-            out.write_char(self.product_name[i] as char)?;
+            out.write_char(self.product_name()[i] as char)?;
         }
         out.write_char('\n')?;
         pm_write!(
             out,
             "  Product revision: {}.{}\n",
-            self.product_revision.0,
-            self.product_revision.1,
+            self.product_revision().0,
+            self.product_revision().1,
         )?;
         pm_write!(
             out,
             "  Serial number:    {}{}\n",
-            (self.product_serial_num >> 16),
-            self.product_serial_num,
+            (self.product_serial_num() >> 16),
+            self.product_serial_num(),
         )?;
         pm_write!(
             out,
             "  Manufacture date: {}-{}\n",
-            self.manufacturing_date_year,
-            self.manufacturing_date_month,
+            self.manufacturing_date().0,
+            self.manufacturing_date().1,
         )?;
         Ok(())
     }
@@ -109,15 +109,19 @@ impl uDebug for CardSpecificData {
     where
         W: uWrite + ?Sized,
     {
-        pm_write!(out, "  CSD version:               {}\n", self.version)?;
-        pm_write!(out, "  Max data transfer rate:    {} MHz\n", self.tran_speed_mhz)?;
+        pm_write!(out, "  CSD version:               {}\n", self.version())?;
+        pm_write!(out, "  Max data transfer rate:    {} MHz\n", self.tran_speed_mhz())?;
         pm_write!(out, "  Supported command classes: ")?;
         for i in 0..12 {
-            out.write_char((((self.supported_command_classes >> (11 - i)) & 0x01) as u8 + b'0') as char)?;
+            out.write_char((((self.supported_command_classes() >> (11 - i)) & 0x01) as u8 + b'0') as char)?;
         }
         out.write_char('\n')?;
-        pm_write!(out, "  Max data read block size:  {}\n", self.max_read_block_len_bytes,)?;
-        pm_write!(out, "  Card capacity:             {} MiB\n", self.capacity_mib)?;
+        pm_write!(
+            out,
+            "  Max data read block size:  {}\n",
+            self.max_read_block_len_bytes(),
+        )?;
+        pm_write!(out, "  Card capacity:             {} MiB\n", self.capacity_mib())?;
         Ok(())
     }
 }

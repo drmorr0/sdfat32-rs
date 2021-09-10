@@ -5,21 +5,80 @@ use super::{
 };
 
 pub struct CardId {
-    pub manufacturer_id: u8,
-    pub oem_id: (u8, u8),
-    pub product_name: [u8; 5],
-    pub product_revision: (u8, u8),
-    pub product_serial_num: u32,
-    pub manufacturing_date_year: u16,
-    pub manufacturing_date_month: u8,
+    manufacturer_id: u8,
+    oem_id: (u8, u8),
+    product_name: [u8; 5],
+    product_revision: (u8, u8),
+    product_serial_num: u32,
+    manufacturing_date_year: u16,
+    manufacturing_date_month: u8,
+}
+
+impl CardId {
+    #[inline(always)]
+    pub fn manufacturer_id(&self) -> u8 {
+        self.manufacturer_id
+    }
+
+    #[inline(always)]
+    pub fn oem_id(&self) -> (u8, u8) {
+        self.oem_id
+    }
+
+    #[inline(always)]
+    pub fn product_name(&self) -> [u8; 5] {
+        self.product_name
+    }
+
+    #[inline(always)]
+    pub fn product_revision(&self) -> (u8, u8) {
+        self.product_revision
+    }
+
+    #[inline(always)]
+    pub fn product_serial_num(&self) -> u32 {
+        self.product_serial_num
+    }
+
+    #[inline(always)]
+    pub fn manufacturing_date(&self) -> (u16, u8) {
+        (self.manufacturing_date_year, self.manufacturing_date_month)
+    }
 }
 
 pub struct CardSpecificData {
-    pub version: u8,
-    pub tran_speed_mhz: u8,
-    pub supported_command_classes: u16,
-    pub max_read_block_len_bytes: u16,
-    pub capacity_mib: u32,
+    version: u8,
+    tran_speed_mhz: u8,
+    supported_command_classes: u16,
+    max_read_block_len_bytes: u16,
+    capacity_mib: u32,
+}
+
+impl CardSpecificData {
+    #[inline(always)]
+    pub fn version(&self) -> u8 {
+        self.version
+    }
+
+    #[inline(always)]
+    pub fn tran_speed_mhz(&self) -> u8 {
+        self.tran_speed_mhz
+    }
+
+    #[inline(always)]
+    pub fn supported_command_classes(&self) -> u16 {
+        self.supported_command_classes
+    }
+
+    #[inline(always)]
+    pub fn max_read_block_len_bytes(&self) -> u16 {
+        self.max_read_block_len_bytes
+    }
+
+    #[inline(always)]
+    pub fn capacity_mib(&self) -> u32 {
+        self.capacity_mib
+    }
 }
 
 impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
