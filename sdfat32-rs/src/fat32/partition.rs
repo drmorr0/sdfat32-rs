@@ -1,4 +1,5 @@
 use super::{
+    constants::*,
     mbr,
     FatError,
 };
@@ -8,10 +9,6 @@ use core::{
     cell::RefCell,
     convert::TryInto,
 };
-
-const LOG2_BYTES_PER_SECTOR: u8 = 9;
-const BYTES_PER_SECTOR: u16 = 512;
-const SECTOR_MASK: u16 = 0x1FF;
 
 #[repr(packed)]
 struct BiosParameterBlock {
@@ -115,7 +112,7 @@ impl Partition {
         }
         let bp = &pbs.bios_params;
 
-        if bp.fat_count != 2 || bp.bytes_per_sector != BYTES_PER_SECTOR {
+        if bp.fat_count != 2 || bp.bytes_per_sector != BYTES_PER_SECTOR as u16 {
             return Err(FatError::CorruptPartition);
         }
 
@@ -177,7 +174,14 @@ impl Partition {
             Err(_) => return Err(FatError::CorruptFat),
         };
 
+        // TODO need EOC check
         Ok(u32::from_le_bytes(sector_bytes_for_cluster))
+    }
+
+    #[inline(always)]
+    pub(crate) fn cluster_start_sector(&self, cluster: u32) -> u32 {
+        // Skip the two reserved clusters at the beginning
+        self.data_start_sector + ((cluster - 2) << self.log2_sectors_per_cluster)
     }
 
     #[inline(always)]
@@ -189,5 +193,11 @@ impl Partition {
     pub(crate) fn log2_bytes_per_cluster(&self) -> u8 {
         // Operating in log space so multiplication becomes addition
         self.log2_sectors_per_cluster + LOG2_BYTES_PER_SECTOR
+    }
+
+    #[inline(always)]
+    pub(crate) fn sector_of_cluster(&self, pos: u32) -> u32 {
+        // Divide by the number of sectors per cluster, and mask to restrict to the current cluster
+        pos >> self.log2_sectors_per_cluster & (self.cluster_sector_mask as u32)
     }
 }

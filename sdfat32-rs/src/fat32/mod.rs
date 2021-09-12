@@ -1,3 +1,4 @@
+mod constants;
 mod debug;
 pub mod file;
 pub mod mbr;
@@ -18,7 +19,10 @@ pub enum FatError {
     SeekError,
     InvalidCluster,
     CorruptFat,
+    VolumeIdMismatch,
     NotADirectory,
+    InvalidPosition,
+    ReadError,
     UnsupportedVersion,
     Unknown,
 }

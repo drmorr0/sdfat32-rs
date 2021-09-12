@@ -29,12 +29,8 @@ use avr_progmem_str::{
 use embedded_hal::spi::MODE_0;
 use sdfat32_rs::{
     fat32,
-    sdcard::{
-        SdCard,
-        SdVersion,
-    },
+    sdcard::SdCard,
 };
-use ufmt::uwrite;
 
 #[arduino_hal::entry]
 fn main() -> ! {
@@ -69,8 +65,8 @@ fn main() -> ! {
 
     match fat32::Mbr::read_part_info(&sdcard) {
         Ok(part_info) => {
-            match fat32::Volume::read(&sdcard, &part_info[0]) {
-                Ok(vol) => match vol.ls(&sdcard, &mut fat32::File::root_directory()) {
+            match fat32::Volume::open_volume(&sdcard, 0, &part_info[0]) {
+                Ok(vol) => match vol.ls(&sdcard, &mut vol.open_root()) {
                     Ok(_) => (),
                     Err(e) => {
                         pm_write!(serial, "Couldn't read directory: {}\n", e as u8).void_unwrap();

@@ -100,7 +100,7 @@ fn main() -> ! {
             }
 
             pm_write!(serial, "\nPartition 0:\n").void_unwrap();
-            match fat32::Volume::read(&sdcard, &part_info[0]) {
+            match fat32::Volume::open_volume(&sdcard, 0, &part_info[0]) {
                 Ok(vol) => {
                     uwrite!(serial, "{:?}", vol.partition).void_unwrap();
                 },
