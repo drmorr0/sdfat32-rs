@@ -10,6 +10,7 @@ use atmega_hal::spi::{
     Spi,
 };
 use avr_hal_generic::{
+    port::PinOps,
     prelude::*,
     spi,
 };
@@ -19,29 +20,17 @@ use embedded_hal::spi::{
     MODE_0,
 };
 
-#[derive(PartialEq, Eq)]
-enum DataMode {
-    Idle,
-    Read,
-    Write,
-}
-
-struct RwState {
-    mode: DataMode,
-    sector: u32,
-}
-
 pub enum SdVersion {
     One,
     Two { sdhc: bool },
 }
 
-pub struct SdCard<CSPIN: avr_hal_generic::port::PinOps> {
+pub struct SdCard<CSPIN: PinOps> {
     pub version: SdVersion,
 
     spi: Spi,
     cs_pin: ChipSelectPin<CSPIN>,
-    rw_state: RwState,
+    rw_state: rwdata::RwState,
 
     millis: fn() -> u32,
 }
@@ -62,7 +51,7 @@ pub enum SdCardError {
     Unknown,
 }
 
-impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
+impl<CSPIN: PinOps> SdCard<CSPIN> {
     pub fn new(
         spi: Spi,
         cs_pin: ChipSelectPin<CSPIN>,
@@ -73,9 +62,9 @@ impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
 
             spi,
             cs_pin,
-            rw_state: RwState {
-                mode: DataMode::Idle,
-                sector: 0,
+            rw_state: rwdata::RwState {
+                mode: rwdata::DataMode::Idle,
+                sector: 0x1234,
             },
 
             millis,
@@ -124,3 +113,5 @@ impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
         nb::block!(self.spi.read()).void_unwrap()
     }
 }
+
+pub type SdCardRef<'s, CSPIN> = &'s RefCell<SdCard<CSPIN>>;

@@ -8,7 +8,10 @@ pub mod volume;
 use crate::sdcard::SdCardError;
 pub use file::File;
 pub use mbr::Mbr;
-pub use volume::Volume;
+pub use volume::{
+    dir::DirEntry,
+    Volume,
+};
 
 pub enum FatError {
     BlockDeviceFailed = 1,

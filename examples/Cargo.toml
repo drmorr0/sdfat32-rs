@@ -4,9 +4,9 @@ version = "0.0.0"
 authors = ["David Morrison <drmorr@evokewonder.com>"]
 edition = "2018"
 
-[[bin]]
-name = "sdinfo"
-path = "src/sdinfo.rs"
+# [[bin]]
+# name = "sdinfo"
+# path = "src/sdinfo.rs"
 
 [[bin]]
 name = "sdls"

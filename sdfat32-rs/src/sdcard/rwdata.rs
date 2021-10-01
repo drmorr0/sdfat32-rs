@@ -1,28 +1,38 @@
 use super::{
     cmd::SdCommand,
-    DataMode,
     SdCard,
     SdCardError,
 };
 use avr_hal_generic::port::PinOps;
 
-const READ_BLOCK_SIZE_V2: usize = 512;
+const BLOCK_SIZE: usize = 512;
+static mut BUFFER: [u8; BLOCK_SIZE] = [0; BLOCK_SIZE];
+
+#[derive(PartialEq, Eq)]
+pub(crate) enum DataMode {
+    Idle,
+    Read,
+    Write,
+}
+
+pub(crate) struct RwState {
+    pub(crate) mode: DataMode,
+    pub(crate) sector: u32,
+}
 
 impl<CSPIN: PinOps> SdCard<CSPIN> {
-    pub fn read_sectors(&mut self, start_sector: u32, data: &mut [u8]) -> Result<(), SdCardError> {
-        if self.rw_state.mode != DataMode::Read || self.rw_state.sector != start_sector {
+    pub fn read_sector_as<T>(&mut self, sector: u32) -> Result<&'static T, SdCardError> {
+        if self.rw_state.mode != DataMode::Read || self.rw_state.sector != sector {
             self.select();
-            self.send_card_command(SdCommand::ReadMultipleBlocks, start_sector)?;
+            self.send_card_command(SdCommand::ReadBlock, sector)?;
             self.rw_state.mode = DataMode::Read;
-            self.rw_state.sector = start_sector;
+            self.rw_state.sector = sector;
+            unsafe {
+                self.read_data(&mut BUFFER)?;
+            }
+            self.unselect();
         }
 
-        for i in (0..data.len()).step_by(READ_BLOCK_SIZE_V2) {
-            self.read_data(&mut data[i..i + READ_BLOCK_SIZE_V2])?;
-            self.rw_state.sector += 1;
-        }
-        self.send_card_command(SdCommand::ReadStop, 0)?;
-        self.unselect();
-        Ok(())
+        unsafe { Ok(core::mem::transmute(BUFFER.as_ptr())) }
     }
 }

@@ -3,12 +3,9 @@ use super::{
     mbr,
     FatError,
 };
-use crate::sdcard::SdCard;
+use crate::sdcard::SdCardRef;
 use avr_hal_generic::port::PinOps;
-use core::{
-    cell::RefCell,
-    convert::TryInto,
-};
+use core::convert::TryInto;
 
 #[repr(packed)]
 struct BiosParameterBlock {
@@ -95,21 +92,11 @@ pub struct Partition {
 
 impl Partition {
     pub(crate) fn read<CSPIN: PinOps>(
-        sdcard: &RefCell<SdCard<CSPIN>>,
+        sdcard: SdCardRef<CSPIN>,
         partition_info: &mbr::PartitionInfo,
     ) -> Result<Partition, FatError> {
-        let mut pbs: PartitionBootSector = PartitionBootSector {
-            _jump_instr: [0; 3],
-            _oem_name: [0; 8],
-            bios_params: BiosParameterBlock::new(),
-            _boot_code: [0; 390],
-            _signature: [0; 2],
-        };
-        let raw_pbs =
-            unsafe { core::slice::from_raw_parts_mut((&mut pbs as *mut PartitionBootSector) as *mut u8, 512) };
-        if let Err(_) = sdcard.borrow_mut().read_sectors(partition_info.start_sector, raw_pbs) {
-            return Err(FatError::CorruptPartition);
-        }
+        let mut sd_borrow_mut = sdcard.borrow_mut();
+        let pbs = sd_borrow_mut.read_sector_as::<PartitionBootSector>(partition_info.start_sector)?;
         let bp = &pbs.bios_params;
 
         if bp.fat_count != 2 || bp.bytes_per_sector != BYTES_PER_SECTOR as u16 {
@@ -151,7 +138,7 @@ impl Partition {
 
     pub(crate) fn fat_get_next_cluster<CSPIN: PinOps>(
         &self,
-        sdcard: &RefCell<SdCard<CSPIN>>,
+        sdcard: SdCardRef<CSPIN>,
         cluster: u32,
     ) -> Result<u32, FatError> {
         if cluster < 2 || cluster > self.last_cluster() {
@@ -163,10 +150,8 @@ impl Partition {
         let fat_sector_to_get = self.fat_start_sector + (cluster >> (LOG2_BYTES_PER_SECTOR - 2));
 
         // TODO implement caching for faster lookups
-        let mut fat_sector_data = [0u8; BYTES_PER_SECTOR as usize];
-        sdcard
-            .borrow_mut()
-            .read_sectors(fat_sector_to_get, &mut fat_sector_data)?;
+        let mut sd_borrow_mut = sdcard.borrow_mut();
+        let fat_sector_data = sd_borrow_mut.read_sector_as::<[u8; BYTES_PER_SECTOR]>(fat_sector_to_get)?;
 
         let idx = (cluster & ((self.cluster_sector_mask >> 2) as u32)) as usize;
         let sector_bytes_for_cluster = match fat_sector_data[idx..idx + 4].try_into() {

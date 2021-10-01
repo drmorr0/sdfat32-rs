@@ -3,6 +3,7 @@ use crate::sdcard::SdCard;
 use core::cell::RefCell;
 
 #[repr(packed)]
+#[derive(Clone, Copy)]
 pub struct PartitionInfo {
     pub boot: u8,
     pub begin_chs: [u8; 3],
@@ -51,11 +52,8 @@ impl Mbr {
     pub fn read_part_info<CSPIN: avr_hal_generic::port::PinOps>(
         sdcard: &RefCell<SdCard<CSPIN>>,
     ) -> Result<[PartitionInfo; 4], FatError> {
-        let mut mbr = Mbr::new();
-        let raw_mbr = unsafe { core::slice::from_raw_parts_mut((&mut mbr as *mut Mbr) as *mut u8, 512) };
-        if let Err(_) = sdcard.borrow_mut().read_sectors(0, raw_mbr) {
-            return Err(FatError::CorruptMBR);
-        }
+        let mut sd_borrow_mut = sdcard.borrow_mut();
+        let mbr = sd_borrow_mut.read_sector_as::<Mbr>(0)?;
         Ok(mbr.partitions)
     }
 }

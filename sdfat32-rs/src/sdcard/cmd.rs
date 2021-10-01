@@ -8,6 +8,7 @@ use super::{
 pub(crate) enum SdCommand {
     GoIdleState = 0,
     ReadStop = 12,
+    ReadBlock = 17,
     ReadMultipleBlocks = 18,
     AppCommand = 55,
     SetCRC = 59,

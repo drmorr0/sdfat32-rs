@@ -1,8 +1,9 @@
-mod dir;
+use super::constants::*;
 
 pub struct File {
     pub(crate) vol_id: u8,
     attributes: u8,
+    // These can't be usize because the FS address space is larger than 16 bits
     pub(crate) cluster: u32,
     pub(crate) pos: u32,
     pub(crate) start_cluster: u32,
@@ -27,9 +28,9 @@ impl File {
         File {
             vol_id,
             attributes: FILE_ATTR_ROOT,
-            cluster: 0,
+            cluster: ROOT_CLUSTER,
             pos: 0,
-            start_cluster: 0,
+            start_cluster: ROOT_CLUSTER,
             flags: FILE_FLAG_READ,
             size: 0,
         }
