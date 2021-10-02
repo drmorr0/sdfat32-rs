@@ -27,6 +27,7 @@ mod kw {
     syn::custom_keyword!(progmem);
 }
 
+
 struct ProgmemStr {
     name: Ident,
     _ty: Type,

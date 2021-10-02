@@ -8,6 +8,7 @@ use crate::{
 };
 use avr_hal_generic::port::PinOps;
 
+
 pub struct DirEntry {
     pub name: [u8; 11],
     attributes: u8,
@@ -114,11 +115,6 @@ impl Volume {
             return Err(FatError::NotADirectory);
         }
 
-        Ok(DirectoryIterator {
-            flags: 0,
-            dir,
-            sdcard,
-            vol: self,
-        })
+        Ok(DirectoryIterator { flags: 0, dir, sdcard, vol: self })
     }
 }

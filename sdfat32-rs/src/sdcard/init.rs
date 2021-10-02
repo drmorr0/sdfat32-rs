@@ -4,13 +4,12 @@ use super::{
         SdCommand,
         SdCommandWide,
     },
+    constants::*,
     SdCard,
     SdCardError,
     SdVersion,
 };
 
-const SD_CMD0_RETRY_COUNT: u8 = 10;
-const SD_INIT_TIMEOUT_MS: u32 = 2000;
 
 impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
     pub(crate) fn init_spi(&mut self) -> Result<(), SdCardError> {
@@ -23,34 +22,6 @@ impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
             init = true;
             i += 1;
         }
-        Ok(())
-    }
-
-    pub(crate) fn check_sd_version(&mut self) -> Result<(), SdCardError> {
-        // Older (SDv1) cards won't recognize this command.  The argument
-        // 0x1AA means 3.3V and check pattern of 0xAA; the SD card should return
-        // the check pattern to ensure correct operation.
-        match self.send_card_command_wide(SdCommandWide::SendIfCond, 0x1AA) {
-            Ok(data) => {
-                // CMD8 has a 40 bit response, and the last 8 bits should match the
-                // check pattern.
-                if data[3] != 0xAA {
-                    return Err(SdCardError::CardCheckPatternMismatch);
-                }
-            },
-            Err(SdCardError::IllegalCommand) => {
-                self.version = SdVersion::One;
-                return Err(SdCardError::SDVersionOneUnsupported);
-            },
-            Err(e) => return Err(e),
-        }
-        Ok(())
-    }
-
-    pub(crate) fn enable_crc(&mut self) -> Result<(), SdCardError> {
-        // By default in SPI mode only CMD0 and CMD8 are CRC-checked;
-        // this command will enable it for all commands
-        self.send_card_command(SdCommand::SetCRC, 1)?;
         Ok(())
     }
 
@@ -84,6 +55,34 @@ impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
             Err(e) => return Err(e),
         }
 
+        Ok(())
+    }
+
+    pub(crate) fn check_sd_version(&mut self) -> Result<(), SdCardError> {
+        // Older (SDv1) cards won't recognize this command.  The argument
+        // 0x1AA means 3.3V and check pattern of 0xAA; the SD card should return
+        // the check pattern to ensure correct operation.
+        match self.send_card_command_wide(SdCommandWide::SendIfCond, 0x1AA) {
+            Ok(data) => {
+                // CMD8 has a 40 bit response, and the last 8 bits should match the
+                // check pattern.
+                if data[3] != 0xAA {
+                    return Err(SdCardError::CardCheckPatternMismatch);
+                }
+            },
+            Err(SdCardError::IllegalCommand) => {
+                self.version = SdVersion::One;
+                return Err(SdCardError::SDVersionOneUnsupported);
+            },
+            Err(e) => return Err(e),
+        }
+        Ok(())
+    }
+
+    pub(crate) fn enable_crc(&mut self) -> Result<(), SdCardError> {
+        // By default in SPI mode only CMD0 and CMD8 are CRC-checked;
+        // this command will enable it for all commands
+        self.send_card_command(SdCommand::SetCRC, 1)?;
         Ok(())
     }
 }

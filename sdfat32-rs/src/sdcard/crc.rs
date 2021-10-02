@@ -1,5 +1,6 @@
 use avr_progmem::progmem;
 
+
 // Stick the CRC table in program memory to save space
 progmem! {
     static progmem CRC_TABLE: [u16; 256] = [
@@ -24,8 +25,8 @@ progmem! {
         0x2E93, 0x3EB2, 0x0ED1, 0x1EF0,
     ];
 }
-
 const CRC7_BYTES: usize = 5;
+
 
 #[allow(non_snake_case)]
 pub fn CRC7(data: [u8; CRC7_BYTES]) -> u8 {

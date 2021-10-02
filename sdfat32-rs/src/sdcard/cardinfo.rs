@@ -5,6 +5,7 @@ use super::{
     BLOCK_SIZE,
 };
 
+
 pub struct CardId {
     manufacturer_id: u8,
     oem_id: (u8, u8),

@@ -1,9 +1,10 @@
 use super::FatError;
 use crate::sdcard::{
-    rwdata::FS_BUFFER,
     SdCard,
+    FS_BUFFER,
 };
 use core::cell::RefCell;
+
 
 #[repr(packed)]
 #[derive(Clone, Copy)]
@@ -39,19 +40,6 @@ pub struct Mbr {
 }
 
 impl Mbr {
-    pub fn new() -> Mbr {
-        Mbr {
-            boot_code: [0; 446],
-            partitions: [
-                PartitionInfo::new(),
-                PartitionInfo::new(),
-                PartitionInfo::new(),
-                PartitionInfo::new(),
-            ],
-            signature: [0; 2],
-        }
-    }
-
     pub fn read_part_info<CSPIN: avr_hal_generic::port::PinOps>(
         sdcard: &RefCell<SdCard<CSPIN>>,
     ) -> Result<[PartitionInfo; 4], FatError> {

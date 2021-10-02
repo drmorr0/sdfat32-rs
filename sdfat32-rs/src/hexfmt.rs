@@ -3,13 +3,6 @@ use ufmt::{
     Formatter,
 };
 
-fn hexfmt_u8(n: u8) -> u8 {
-    match n & 0xf {
-        v if v <= 9 => (v as u8) + 48,
-        v if v > 9 => (v as u8) + 87,
-        _ => 63, // '?'
-    }
-}
 
 pub(crate) fn hexfmt32_le<W>(serial: &mut Formatter<W>, mut n: u32) -> Result<(), W::Error>
 where
@@ -27,4 +20,12 @@ where
         serial.write_char(*c as char)?;
     }
     Ok(())
+}
+
+fn hexfmt_u8(n: u8) -> u8 {
+    match n & 0xf {
+        v if v <= 9 => (v as u8) + 48,
+        v if v > 9 => (v as u8) + 87,
+        _ => 63, // '?'
+    }
 }

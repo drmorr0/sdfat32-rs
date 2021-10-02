@@ -13,35 +13,20 @@ use ufmt::{
     Formatter,
 };
 
+
 pub fn ptype_write<W>(serial: &mut Formatter<W>, ptype: u8) -> Result<(), W::Error>
 where
     W: uWrite + ?Sized,
 {
     match ptype {
-        0x00 => {
-            pm_write!(serial, "Empty")?;
-        },
-        0x07 => {
-            pm_write!(serial, "NTFS")?;
-        },
-        0x0b => {
-            pm_write!(serial, "FAT32 + CHS")?;
-        },
-        0x0c => {
-            pm_write!(serial, "FAT32 + LBA")?;
-        },
-        0x0f => {
-            pm_write!(serial, "Extended Partition + LBA")?;
-        },
-        0x82 => {
-            pm_write!(serial, "Linux Swap Space")?;
-        },
-        0x83 => {
-            pm_write!(serial, "Linux File System")?;
-        },
-        _ => {
-            pm_write!(serial, "Unknown ({})", ptype)?;
-        },
+        0x00 => pm_write!(serial, "Empty")?,
+        0x07 => pm_write!(serial, "NTFS")?,
+        0x0b => pm_write!(serial, "FAT32 + CHS")?,
+        0x0c => pm_write!(serial, "FAT32 + LBA")?,
+        0x0f => pm_write!(serial, "Extended Partition + LBA")?,
+        0x82 => pm_write!(serial, "Linux Swap Space")?,
+        0x83 => pm_write!(serial, "Linux File System")?,
+        _ => pm_write!(serial, "Unknown ({})", ptype)?,
     };
     Ok(())
 }

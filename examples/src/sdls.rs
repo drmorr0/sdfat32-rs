@@ -35,6 +35,7 @@ use sdfat32_rs::{
     sdcard::SdCard,
 };
 
+
 #[arduino_hal::entry]
 fn main() -> ! {
     let dp = match arduino_hal::Peripherals::take() {
