@@ -58,7 +58,8 @@ impl<CSPIN: PinOps> Iterator for DirectoryIterator<'_, '_, '_, CSPIN> {
             return Some(Err(FatError::InvalidPosition));
         }
         match self.vol.load_sector_for_file(self.sdcard, self.dir) {
-            Ok((sector, sector_pos)) => {
+            Ok((sector_block, sector_pos)) => {
+                let sector = sector_block.get();
                 let mut entry = DirEntry {
                     name: [
                         sector[sector_pos + 0],

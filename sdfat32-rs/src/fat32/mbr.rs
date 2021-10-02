@@ -54,6 +54,6 @@ impl Mbr {
     ) -> Result<[PartitionInfo; 4], FatError> {
         let mut sd_borrow_mut = sdcard.borrow_mut();
         let mbr = sd_borrow_mut.read_sector_as::<Mbr>(0)?;
-        Ok(mbr.partitions)
+        Ok(mbr.get().partitions)
     }
 }

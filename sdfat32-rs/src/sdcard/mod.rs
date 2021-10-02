@@ -20,6 +20,9 @@ use embedded_hal::spi::{
     MODE_0,
 };
 
+pub(crate) use rwdata::Block;
+pub use rwdata::BLOCK_SIZE;
+
 pub enum SdVersion {
     One,
     Two { sdhc: bool },
@@ -27,11 +30,8 @@ pub enum SdVersion {
 
 pub struct SdCard<CSPIN: PinOps> {
     pub version: SdVersion,
-
     spi: Spi,
     cs_pin: ChipSelectPin<CSPIN>,
-    rw_state: rwdata::RwState,
-
     millis: fn() -> u32,
 }
 
@@ -47,6 +47,7 @@ pub enum SdCardError {
     ReadError,
     SDVersionOneUnsupported,
     CardCheckPatternMismatch,
+    DataBufferLocked,
     Timeout,
     Unknown,
 }
@@ -59,14 +60,8 @@ impl<CSPIN: PinOps> SdCard<CSPIN> {
     ) -> Result<RefCell<SdCard<CSPIN>>, SdCardError> {
         let mut sdcard = SdCard {
             version: SdVersion::Two { sdhc: false },
-
             spi,
             cs_pin,
-            rw_state: rwdata::RwState {
-                mode: rwdata::DataMode::Idle,
-                sector: 0x1234,
-            },
-
             millis,
         };
 

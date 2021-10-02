@@ -36,38 +36,6 @@ struct BiosParameterBlock {
     _volume_type: [u8; 8],
 }
 
-impl BiosParameterBlock {
-    fn new() -> BiosParameterBlock {
-        BiosParameterBlock {
-            bytes_per_sector: 0,
-            sectors_per_cluster: 0,
-            reserved_sector_count: 0,
-            fat_count: 0,
-            _root_dir_entry_count: 0, // Unused in FAT32
-            _total_sectors_16: 0,     // Unused in FAT32
-            _media_type: 0,
-            _sectors_per_fat_16: 0, // Unused in FAT32
-            _sectors_per_track: 0,
-            _head_count: 0,
-            _hidden_sectors: 0,
-            total_sectors_32: 0,
-            sectors_per_fat_32: 0,
-            _fat_32_flags: 0,
-            _fat_32_version: 0,
-            _fat_32_root_cluster: 0,
-            _fat_32_fs_info_sector: 0,
-            _fat_32_back_boot_sector: 0,
-            _fat_32_reserved: [0; 12],
-            _physical_drive_number: 0,
-            _ext_reserved: 0,
-            _ext_signature: 0,
-            _volume_serial_number: 0,
-            volume_label: [0; 11],
-            _volume_type: [0; 8],
-        }
-    }
-}
-
 #[repr(packed)]
 struct PartitionBootSector {
     _jump_instr: [u8; 3],
@@ -96,7 +64,8 @@ impl Partition {
         partition_info: &mbr::PartitionInfo,
     ) -> Result<Partition, FatError> {
         let mut sd_borrow_mut = sdcard.borrow_mut();
-        let pbs = sd_borrow_mut.read_sector_as::<PartitionBootSector>(partition_info.start_sector)?;
+        let pbs_block = sd_borrow_mut.read_sector_as::<PartitionBootSector>(partition_info.start_sector)?;
+        let pbs = pbs_block.get();
         let bp = &pbs.bios_params;
 
         if bp.fat_count != 2 || bp.bytes_per_sector != BYTES_PER_SECTOR as u16 {
@@ -152,9 +121,10 @@ impl Partition {
         // TODO implement caching for faster lookups
         let mut sd_borrow_mut = sdcard.borrow_mut();
         let fat_sector_data = sd_borrow_mut.read_sector_as::<[u8; BYTES_PER_SECTOR]>(fat_sector_to_get)?;
+        let fat_sector = fat_sector_data.get();
 
         let idx = (cluster & ((self.cluster_sector_mask >> 2) as u32)) as usize;
-        let sector_bytes_for_cluster = match fat_sector_data[idx..idx + 4].try_into() {
+        let sector_bytes_for_cluster = match fat_sector[idx..idx + 4].try_into() {
             Ok(val) => val,
             Err(_) => return Err(FatError::CorruptFat),
         };

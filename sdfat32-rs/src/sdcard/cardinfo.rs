@@ -2,6 +2,7 @@ use super::{
     cmd::SdRegister,
     SdCard,
     SdCardError,
+    BLOCK_SIZE,
 };
 
 pub struct CardId {
@@ -50,7 +51,7 @@ pub struct CardSpecificData {
     version: u8,
     tran_speed_mhz: u8,
     supported_command_classes: u16,
-    max_read_block_len_bytes: u16,
+    max_read_block_len_bytes: usize,
     capacity_mib: u32,
 }
 
@@ -71,7 +72,7 @@ impl CardSpecificData {
     }
 
     #[inline(always)]
-    pub fn max_read_block_len_bytes(&self) -> u16 {
+    pub fn max_read_block_len_bytes(&self) -> usize {
         self.max_read_block_len_bytes
     }
 
@@ -113,7 +114,7 @@ impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
             },
             supported_command_classes: ((data[4] as u16) << 4) | ((data[5] as u16) >> 4),
             max_read_block_len_bytes: match data[5] & 0x0f {
-                0x09 => 512,
+                0x09 => BLOCK_SIZE,
                 _ => 0,
             },
             capacity_mib: ((((((data[7] & 0x3f) as u32) << 16 | (data[8] as u32) << 8 | (data[9] as u32)) + 1) as u64

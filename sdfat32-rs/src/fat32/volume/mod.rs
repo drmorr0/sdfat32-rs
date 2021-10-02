@@ -10,7 +10,10 @@ use crate::{
         mbr,
         partition::Partition,
     },
-    sdcard::SdCardRef,
+    sdcard::{
+        Block,
+        SdCardRef,
+    },
 };
 use avr_hal_generic::port::PinOps;
 use core::{
@@ -158,7 +161,7 @@ impl Volume {
         &mut self,
         sdcard: SdCardRef<CSPIN>,
         file: &mut File,
-    ) -> Result<(&[u8], usize), FatError> {
+    ) -> Result<(Block<[u8; BYTES_PER_SECTOR]>, usize), FatError> {
         // Unchecked; we assume that the file belongs to this volume and is readable
         let sector_pos = (file.pos & (SECTOR_MASK as u32)) as usize;
         let sector_of_cluster = self.partition.sector_of_cluster(file.pos);

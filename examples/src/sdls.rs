@@ -34,7 +34,6 @@ use sdfat32_rs::{
     },
     sdcard::SdCard,
 };
-use ufmt::uwrite;
 
 #[arduino_hal::entry]
 fn main() -> ! {
