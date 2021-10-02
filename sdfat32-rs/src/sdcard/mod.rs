@@ -3,7 +3,7 @@ mod cmd;
 mod crc;
 mod debug;
 mod init;
-mod rwdata;
+pub(crate) mod rwdata;
 
 use atmega_hal::spi::{
     ChipSelectPin,
@@ -20,7 +20,6 @@ use embedded_hal::spi::{
     MODE_0,
 };
 
-pub(crate) use rwdata::Block;
 pub use rwdata::BLOCK_SIZE;
 
 pub enum SdVersion {

@@ -11,7 +11,10 @@ use crate::{
         partition::Partition,
     },
     sdcard::{
-        Block,
+        rwdata::{
+            Block,
+            DATA_BUFFER,
+        },
         SdCardRef,
     },
 };
@@ -168,25 +171,16 @@ impl Volume {
 
         // This is the start of a new cluster, but we don't know which one yet
         if file.pos != 0 && sector_pos == 0 && sector_of_cluster == 0 {
-            // SdFat has a check for file.pos == 0 here, and sets the cluster accordingly,
-            // but I don't think that should be possible in this loop?  If file.pos == 0,
-            // it's because a) the file was just opened or b) we called seek, and in either
-            // case file.cluster should be set correctly
-
             if file.is_file() && file.is_contiguous() {
                 file.cluster += 1;
             } else {
                 file.cluster = self.partition.fat_get_next_cluster(sdcard, file.cluster)?;
             }
         }
-        let sector = self.partition.cluster_start_sector(file.cluster) + sector_of_cluster;
-        match sdcard.borrow_mut().read_sector_as::<[u8; BYTES_PER_SECTOR]>(sector) {
-            Ok(sector) => {
-                return Ok((sector, sector_pos));
-            },
-            Err(e) => {
-                return Err(FatError::from(e));
-            },
+        let sector_index = self.partition.cluster_start_sector(file.cluster) + sector_of_cluster;
+        match sdcard.borrow_mut().read_sector_as::<SECTOR>(DATA_BUFFER, sector_index) {
+            Ok(sector) => Ok((sector, sector_pos)),
+            Err(e) => Err(FatError::from(e)),
         }
     }
 }

@@ -64,7 +64,7 @@ impl Partition {
         partition_info: &mbr::PartitionInfo,
     ) -> Result<Partition, FatError> {
         let mut sd_borrow_mut = sdcard.borrow_mut();
-        let pbs_block = sd_borrow_mut.read_sector_as::<PartitionBootSector>(partition_info.start_sector)?;
+        let pbs_block = sd_borrow_mut.read_sector_as::<PartitionBootSector>(0, partition_info.start_sector)?;
         let pbs = pbs_block.get();
         let bp = &pbs.bios_params;
 
@@ -120,11 +120,10 @@ impl Partition {
 
         // TODO implement caching for faster lookups
         let mut sd_borrow_mut = sdcard.borrow_mut();
-        let fat_sector_data = sd_borrow_mut.read_sector_as::<[u8; BYTES_PER_SECTOR]>(fat_sector_to_get)?;
-        let fat_sector = fat_sector_data.get();
+        let fat_sector_data = sd_borrow_mut.read_sector_as::<SECTOR>(0, fat_sector_to_get)?.get();
 
         let idx = (cluster & ((self.cluster_sector_mask >> 2) as u32)) as usize;
-        let sector_bytes_for_cluster = match fat_sector[idx..idx + 4].try_into() {
+        let sector_bytes_for_cluster = match fat_sector_data[idx..idx + 4].try_into() {
             Ok(val) => val,
             Err(_) => return Err(FatError::CorruptFat),
         };

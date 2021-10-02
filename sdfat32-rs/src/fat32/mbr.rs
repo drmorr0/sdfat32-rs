@@ -1,5 +1,8 @@
 use super::FatError;
-use crate::sdcard::SdCard;
+use crate::sdcard::{
+    rwdata::FS_BUFFER,
+    SdCard,
+};
 use core::cell::RefCell;
 
 #[repr(packed)]
@@ -53,7 +56,7 @@ impl Mbr {
         sdcard: &RefCell<SdCard<CSPIN>>,
     ) -> Result<[PartitionInfo; 4], FatError> {
         let mut sd_borrow_mut = sdcard.borrow_mut();
-        let mbr = sd_borrow_mut.read_sector_as::<Mbr>(0)?;
+        let mbr = sd_borrow_mut.read_sector_as::<Mbr>(FS_BUFFER, 0)?;
         Ok(mbr.get().partitions)
     }
 }
