@@ -7,6 +7,7 @@ use crate::sdcard::SdCardRef;
 use avr_hal_generic::port::PinOps;
 use core::convert::TryInto;
 
+
 #[repr(packed)]
 struct BiosParameterBlock {
     bytes_per_sector: u16,

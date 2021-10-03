@@ -1,8 +1,10 @@
 use super::{
+    constants::*,
     crc::CRC7,
     SdCard,
     SdCardError,
 };
+
 
 #[derive(Clone, Copy)]
 pub(crate) enum SdCommand {
@@ -26,15 +28,51 @@ pub(crate) enum SdCommandWide {
 }
 
 #[derive(Clone, Copy)]
-pub enum SdRegister {
+pub(crate) enum SdRegister {
     CSD = 9,
     CID = 10,
 }
 
-const SD_READ_TIMEOUT_MS: u32 = 300;
-const DATA_START_SECTOR: u8 = 0xfe;
 
 impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
+    pub(crate) fn read_data(&mut self, dest: &mut [u8]) -> Result<(), SdCardError> {
+        let start_time_ms = (self.millis)();
+
+        let mut res = self.transfer(0xff);
+        while res == 0xff {
+            if (self.millis)() >= start_time_ms + SD_READ_TIMEOUT_MS {
+                return Err(SdCardError::Timeout);
+            }
+            res = self.transfer(0xff);
+        }
+
+        if res != DATA_START_SECTOR {
+            return Err(SdCardError::ReadError);
+        }
+
+        for i in 0..dest.len() {
+            dest[i] = self.transfer(0xff);
+        }
+
+        let _crc: u16 = ((self.transfer(0xff) as u16) << 8) | (self.transfer(0xff) as u16);
+
+        Ok(())
+    }
+
+    pub(crate) fn read_register(&mut self, reg: SdRegister) -> Result<[u8; 16], SdCardError> {
+        self.select();
+        match self.send_card_command_helper(reg as u8, 0) {
+            Ok(b) if b == 0 => (),
+            Ok(_) => return Err(SdCardError::RegisterError),
+            Err(e) => return Err(e),
+        }
+
+        let mut data = [0u8; 16];
+        self.read_data(&mut data)?;
+        self.unselect();
+        Ok(data)
+    }
+
     pub(crate) fn send_card_app_command(&mut self, cmd: SdAppCommand, arg: u32) -> Result<u8, SdCardError> {
         // Application-specific commands have to be preceded by CMD55 or they will error
         self.send_card_command_helper(SdCommand::AppCommand as u8, 0)?;
@@ -70,13 +108,7 @@ impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
 
         // Command format is 01CCCCCCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARRRRRRR1
         // where C is the 6-bit command, A is the 32-bit argument, and R is the 7-bit CRC
-        let data = [
-            0x40 | cmd as u8,
-            (arg >> 24) as u8,
-            (arg >> 16) as u8,
-            (arg >> 8) as u8,
-            arg as u8,
-        ];
+        let data = [0x40 | cmd as u8, (arg >> 24) as u8, (arg >> 16) as u8, (arg >> 8) as u8, arg as u8];
         let crc = CRC7(data);
         for byte in data.iter() {
             self.transfer(*byte);
@@ -96,43 +128,5 @@ impl<CSPIN: avr_hal_generic::port::PinOps> SdCard<CSPIN> {
             }
         }
         Err(SdCardError::NoResponse)
-    }
-
-    pub fn read_register(&mut self, reg: SdRegister) -> Result<[u8; 16], SdCardError> {
-        self.select();
-        match self.send_card_command_helper(reg as u8, 0) {
-            Ok(b) if b == 0 => (),
-            Ok(_) => return Err(SdCardError::RegisterError),
-            Err(e) => return Err(e),
-        }
-
-        let mut data = [0u8; 16];
-        self.read_data(&mut data)?;
-        self.unselect();
-        Ok(data)
-    }
-
-    pub(crate) fn read_data(&mut self, dest: &mut [u8]) -> Result<(), SdCardError> {
-        let start_time_ms = (self.millis)();
-
-        let mut res = self.transfer(0xff);
-        while res == 0xff {
-            if (self.millis)() >= start_time_ms + SD_READ_TIMEOUT_MS {
-                return Err(SdCardError::Timeout);
-            }
-            res = self.transfer(0xff);
-        }
-
-        if res != DATA_START_SECTOR {
-            return Err(SdCardError::ReadError);
-        }
-
-        for i in 0..dest.len() {
-            dest[i] = self.transfer(0xff);
-        }
-
-        let _crc: u16 = ((self.transfer(0xff) as u16) << 8) | (self.transfer(0xff) as u16);
-
-        Ok(())
     }
 }

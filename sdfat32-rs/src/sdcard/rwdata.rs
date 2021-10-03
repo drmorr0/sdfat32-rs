@@ -1,10 +1,25 @@
 use super::{
     cmd::SdCommand,
+    constants::*,
     SdCard,
     SdCardError,
 };
 use avr_hal_generic::port::PinOps;
 use core::marker::PhantomData;
+
+
+pub(crate) const BUFFER_COUNT: usize = 2;
+pub(crate) const FS_BUFFER: usize = 0;
+pub(crate) const DATA_BUFFER: usize = 1;
+static mut BUFFER: [u8; BLOCK_SIZE * BUFFER_COUNT] = [0; BLOCK_SIZE * BUFFER_COUNT];
+static mut BUFFER_MODE: [DataMode; BUFFER_COUNT] = [DataMode::Idle; 2];
+static mut SECTOR_IN_BUFFER: [u32; BUFFER_COUNT] = [0; 2];
+
+pub(crate) struct Block<T> {
+    buffer_index: usize,
+    old_buffer_mode: DataMode,
+    object: PhantomData<T>,
+}
 
 #[derive(PartialEq, Eq, Clone, Copy)]
 pub(crate) enum DataMode {
@@ -14,19 +29,6 @@ pub(crate) enum DataMode {
     Write,
 }
 
-pub const BLOCK_SIZE: usize = 512;
-const BUFFER_COUNT: usize = 2;
-pub(crate) const FS_BUFFER: usize = 0;
-pub(crate) const DATA_BUFFER: usize = 1;
-static mut BUFFER: [u8; BLOCK_SIZE * BUFFER_COUNT] = [0; BLOCK_SIZE * BUFFER_COUNT];
-static mut BUFFER_MODE: [DataMode; BUFFER_COUNT] = [DataMode::Idle; 2];
-static mut SECTOR_IN_BUFFER: [u32; BUFFER_COUNT] = [0; 2];
-
-pub struct Block<T> {
-    buffer_index: usize,
-    old_buffer_mode: DataMode,
-    object: PhantomData<T>,
-}
 
 impl<T> Block<T> {
     pub(crate) fn new(buffer_index: usize) -> Block<T> {
@@ -35,11 +37,7 @@ impl<T> Block<T> {
             old_buffer_mode = BUFFER_MODE[buffer_index];
             BUFFER_MODE[buffer_index] = DataMode::Locked;
         }
-        Block {
-            buffer_index,
-            old_buffer_mode,
-            object: PhantomData,
-        }
+        Block { buffer_index, old_buffer_mode, object: PhantomData }
     }
 
     pub(crate) fn get(&self) -> &'static T {
@@ -68,7 +66,7 @@ fn read_required(buffer_index: usize, sector: u32) -> bool {
 }
 
 impl<CSPIN: PinOps> SdCard<CSPIN> {
-    pub fn read_sector_as<T>(&mut self, buffer_index: usize, sector: u32) -> Result<Block<T>, SdCardError> {
+    pub(crate) fn read_sector_as<T>(&mut self, buffer_index: usize, sector: u32) -> Result<Block<T>, SdCardError> {
         if buffer_index > BUFFER_COUNT {
             panic!();
         }

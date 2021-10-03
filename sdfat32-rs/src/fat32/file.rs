@@ -1,12 +1,12 @@
 use super::constants::*;
 
+// Clusters can't be usize because the FS address space is larger than 16 bits
 pub struct File {
-    pub(crate) vol_id: u8,
-    attributes: u8,
-    // These can't be usize because the FS address space is larger than 16 bits
     pub(crate) cluster: u32,
     pub(crate) pos: u32,
     pub(crate) start_cluster: u32,
+    pub(crate) vol_id: u8,
+    attributes: u8,
     flags: u8,
     size: u32,
 }
@@ -26,11 +26,11 @@ const FILE_FLAG_CONTIGUOUS: u8 = 0x40;
 impl File {
     pub(crate) fn open_root(vol_id: u8) -> File {
         File {
-            vol_id,
-            attributes: FILE_ATTR_ROOT,
             cluster: ROOT_CLUSTER,
             pos: 0,
             start_cluster: ROOT_CLUSTER,
+            vol_id,
+            attributes: FILE_ATTR_ROOT,
             flags: FILE_FLAG_READ,
             size: 0,
         }

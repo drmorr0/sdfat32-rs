@@ -11,11 +11,9 @@ use crate::{
         partition::Partition,
     },
     sdcard::{
-        rwdata::{
-            Block,
-            DATA_BUFFER,
-        },
+        Block,
         SdCardRef,
+        DATA_BUFFER,
     },
 };
 use avr_hal_generic::port::PinOps;
@@ -24,9 +22,10 @@ use core::{
     convert::TryInto,
 };
 
+
 pub struct Volume {
-    id: u8,
     pub partition: Partition,
+    id: u8,
 }
 
 impl Volume {
@@ -36,8 +35,8 @@ impl Volume {
         part_info: &mbr::PartitionInfo,
     ) -> Result<Volume, FatError> {
         Ok(Volume {
-            id: part_id,
             partition: Partition::read(sdcard, part_info)?,
+            id: part_id,
         })
     }
 
@@ -133,11 +132,7 @@ impl Volume {
 
             let cluster_idx_cur = (file.pos - 1) >> self.partition.log2_bytes_per_cluster();
             if cluster_idx_new < cluster_idx_cur || file.pos == 0 {
-                file.cluster = if file.is_root() {
-                    ROOT_CLUSTER
-                } else {
-                    file.start_cluster
-                };
+                file.cluster = if file.is_root() { ROOT_CLUSTER } else { file.start_cluster };
             } else {
                 cluster_idx_new -= cluster_idx_cur;
             }
