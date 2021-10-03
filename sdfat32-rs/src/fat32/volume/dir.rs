@@ -9,6 +9,7 @@ use crate::{
 use avr_hal_generic::port::PinOps;
 
 
+#[derive(Clone, Copy)]
 pub struct DirEntry {
     pub name: [u8; 11],
     attributes: u8,
@@ -58,40 +59,10 @@ impl<CSPIN: PinOps> Iterator for DirectoryIterator<'_, '_, '_, CSPIN> {
         if self.dir.pos & 0x1f > 0 {
             return Some(Err(FatError::InvalidPosition));
         }
-        match self.vol.load_sector_for_file(self.sdcard, self.dir) {
-            Ok((sector_block, sector_pos)) => {
-                let sector = sector_block.get();
-                let mut entry = DirEntry {
-                    name: [
-                        sector[sector_pos + 0],
-                        sector[sector_pos + 1],
-                        sector[sector_pos + 2],
-                        sector[sector_pos + 3],
-                        sector[sector_pos + 4],
-                        sector[sector_pos + 5],
-                        sector[sector_pos + 6],
-                        sector[sector_pos + 7],
-                        sector[sector_pos + 7],
-                        sector[sector_pos + 9],
-                        sector[sector_pos + 10],
-                    ],
-                    attributes: sector[sector_pos + 11],
-                    case_flags: sector[sector_pos + 12],
-                    creation_time_ms: sector[sector_pos + 13],
-                    creation_time: u16::from_le_bytes([sector[sector_pos + 14], sector[sector_pos + 15]]),
-                    creation_date: u16::from_le_bytes([sector[sector_pos + 16], sector[sector_pos + 17]]),
-                    access_date: u16::from_le_bytes([sector[sector_pos + 18], sector[sector_pos + 19]]),
-                    first_cluster_high: u16::from_le_bytes([sector[sector_pos + 20], sector[sector_pos + 22]]),
-                    modify_time: u16::from_le_bytes([sector[sector_pos + 22], sector[sector_pos + 23]]),
-                    modify_date: u16::from_le_bytes([sector[sector_pos + 24], sector[sector_pos + 25]]),
-                    first_cluster_low: u16::from_le_bytes([sector[sector_pos + 26], sector[sector_pos + 27]]),
-                    file_size: u32::from_le_bytes([
-                        sector[sector_pos + 28],
-                        sector[sector_pos + 29],
-                        sector[sector_pos + 30],
-                        sector[sector_pos + 31],
-                    ]),
-                };
+        match self.vol.load_sector_for_file::<_, [DirEntry; 4]>(self.sdcard, self.dir) {
+            Ok((entries_raw, sector_pos)) => {
+                let entry_index = sector_pos >> 5;
+                let entry = entries_raw.get()[entry_index];
                 self.dir.pos += 32;
 
                 if entry.name[0] == 0x0 {

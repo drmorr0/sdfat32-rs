@@ -155,11 +155,11 @@ impl Volume {
 
     // returns: the position in the sector corresponding to the file.pos
     // (guaranteed to be at most BYTES_PER_SECTOR, so usize is fine)
-    fn load_sector_for_file<CSPIN: PinOps>(
+    fn load_sector_for_file<CSPIN: PinOps, T>(
         &mut self,
         sdcard: SdCardRef<CSPIN>,
         file: &mut File,
-    ) -> Result<(Block<[u8; BYTES_PER_SECTOR]>, usize), FatError> {
+    ) -> Result<(Block<T>, usize), FatError> {
         // Unchecked; we assume that the file belongs to this volume and is readable
         let sector_pos = (file.pos & (SECTOR_MASK as u32)) as usize;
         let sector_of_cluster = self.partition.sector_of_cluster(file.pos);
@@ -173,7 +173,7 @@ impl Volume {
             }
         }
         let sector_index = self.partition.cluster_start_sector(file.cluster) + sector_of_cluster;
-        match sdcard.borrow_mut().read_sector_as::<SECTOR>(DATA_BUFFER, sector_index) {
+        match sdcard.borrow_mut().read_sector_as::<T>(DATA_BUFFER, sector_index) {
             Ok(sector) => Ok((sector, sector_pos)),
             Err(e) => Err(FatError::from(e)),
         }
