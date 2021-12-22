@@ -1,4 +1,4 @@
-pub mod dir;
+mod dir_iter;
 
 use super::{
     constants::*,
@@ -6,9 +6,10 @@ use super::{
 };
 use crate::{
     fat32::{
-        file::File,
         mbr,
         partition::Partition,
+        DirEntry,
+        File,
     },
     sdcard::{
         Block,
@@ -40,11 +41,14 @@ impl Volume {
         })
     }
 
-    pub fn ls<CSPIN: PinOps>(
-        &mut self,
+    pub fn ls<CSPIN: PinOps, T>(
+        &self,
         sdcard: SdCardRef<CSPIN>,
         dir: &mut File,
-        mut func: impl FnMut(dir::DirEntry) -> (),
+        depth: u16,
+        depth_limit: u16,
+        context: &mut T,
+        mut func: impl FnMut(&DirEntry, u16, &mut T) -> () + Copy,
     ) -> Result<(), FatError> {
         if dir.vol_id != self.id {
             return Err(FatError::VolumeIdMismatch);
@@ -53,11 +57,19 @@ impl Volume {
         }
         self.seek_file(sdcard, dir, 0)?;
 
-        for maybe_file in self.dir_next(sdcard, dir)? {
-            let file = maybe_file?;
-            func(file);
+        for maybe_file_entry in self.dir_next(sdcard, dir)? {
+            let file_entry = maybe_file_entry?;
+            func(&file_entry, depth, context);
+            if depth_limit > 0 && file_entry.is_directory() && !file_entry.is_self_or_parent() {
+                let mut d = self.open(&file_entry);
+                self.ls(sdcard, &mut d, depth + 1, depth_limit - 1, context, func)?
+            }
         }
         Ok(())
+    }
+
+    pub fn open(&self, entry: &DirEntry) -> File {
+        File::open(self.id, entry)
     }
 
     pub fn open_root(&self) -> File {
@@ -156,7 +168,7 @@ impl Volume {
     // returns: the position in the sector corresponding to the file.pos
     // (guaranteed to be at most BYTES_PER_SECTOR, so usize is fine)
     fn load_sector_for_file<CSPIN: PinOps, T>(
-        &mut self,
+        &self,
         sdcard: SdCardRef<CSPIN>,
         file: &mut File,
     ) -> Result<(Block<T>, usize), FatError> {

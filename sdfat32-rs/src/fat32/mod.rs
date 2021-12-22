@@ -1,17 +1,17 @@
 mod constants;
+mod data;
 mod debug;
-pub mod file;
 pub mod mbr;
 pub mod partition;
 pub mod volume;
 
 use crate::sdcard::SdCardError;
-pub use file::File;
-pub use mbr::Mbr;
-pub use volume::{
-    dir::DirEntry,
-    Volume,
+pub use data::{
+    DirEntry,
+    File,
 };
+pub use mbr::Mbr;
+pub use volume::Volume;
 
 pub enum FatError {
     BlockDeviceFailed = 1,
@@ -27,6 +27,7 @@ pub enum FatError {
     InvalidPosition,
     ReadError,
     UnsupportedVersion,
+    TooManySubdirs,
     Unknown,
 }
 

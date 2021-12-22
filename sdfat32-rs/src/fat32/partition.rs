@@ -153,6 +153,6 @@ impl Partition {
     #[inline(always)]
     pub(crate) fn sector_of_cluster(&self, pos: u32) -> u32 {
         // Divide by the number of sectors per cluster, and mask to restrict to the current cluster
-        pos >> self.log2_sectors_per_cluster & (self.cluster_sector_mask as u32)
+        (pos >> LOG2_BYTES_PER_SECTOR) & (self.cluster_sector_mask as u32)
     }
 }

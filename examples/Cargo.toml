@@ -12,6 +12,10 @@ path = "src/sdinfo.rs"
 name = "sdls"
 path = "src/sdls.rs"
 
+[[bin]]
+name = "test"
+path = "src/test.rs"
+
 [features]
 atmega328p = ["atmega-hal/atmega328p", "avr-async/atmega328p"]
 
@@ -22,6 +26,7 @@ features = ["atmega328p"]
 [dependencies]
 avr-progmem = "*"
 embedded-hal = "0.2.5"
+panic-halt = "0.2.0"
 ufmt = "*"
 
 [dependencies.sdfat32-rs]

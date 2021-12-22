@@ -34,6 +34,30 @@ use sdfat32_rs::{
     },
     sdcard::SdCard,
 };
+use ufmt::uwrite;
+
+const RECURSION_DEPTH: u16 = 1;
+
+
+fn print_entry(f: &DirEntry, depth: u16, serial: &mut Usart0<MHz16>) {
+    if f.is_self_or_parent() {
+        return;
+    }
+
+    for _ in 0..depth {
+        serial.write_char(' ').void_unwrap();
+    }
+
+    for c in f.name() {
+        serial.write_char(*c as char).void_unwrap();
+    }
+    if f.is_directory() {
+        serial.write_char('D').void_unwrap();
+    } else {
+        serial.write_char('F').void_unwrap();
+    }
+    uwrite!(serial, "    {}\n", f.size()).void_unwrap();
+}
 
 
 #[arduino_hal::entry]
@@ -70,14 +94,10 @@ fn main() -> ! {
     match fat32::Mbr::read_part_info(&sdcard) {
         Ok(part_info) => {
             match fat32::Volume::open_volume(&sdcard, 0, &part_info[0]) {
-                Ok(mut vol) => {
+                Ok(vol) => {
                     pm_write!(serial, "volume opened!  Contents:\n").void_unwrap();
-                    if let Err(e) = vol.ls(&sdcard, &mut vol.open_root(), |f: DirEntry| {
-                        for c in f.name {
-                            serial.write_char(c as char).void_unwrap();
-                        }
-                        serial.write_char('\n').void_unwrap();
-                    }) {
+                    let mut root = vol.open_root();
+                    if let Err(e) = vol.ls(&sdcard, &mut root, 0, RECURSION_DEPTH, &mut serial, print_entry) {
                         pm_write!(serial, "Couldn't read directory: {}\n", e as u8).void_unwrap();
                         panic!("");
                     }
