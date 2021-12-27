@@ -10,7 +10,7 @@ use crate::{
 use avr_hal_generic::port::PinOps;
 
 
-pub struct DirectoryIterator<'d, 'v: 'd, 's: 'v, CSPIN: PinOps> {
+pub(crate) struct DirectoryIterator<'d, 'v: 'd, 's: 'v, CSPIN: PinOps> {
     flags: u8,
     dir: &'d mut File,
     sdcard: SdCardRef<'s, CSPIN>,
@@ -43,15 +43,12 @@ impl<CSPIN: PinOps> Iterator for DirectoryIterator<'_, '_, '_, CSPIN> {
 }
 
 impl Volume {
-    pub fn dir_next<'d, 'v: 'd, 's: 'v, CSPIN: PinOps>(
+    pub(crate) fn dir_next<'d, 'v: 'd, 's: 'v, CSPIN: PinOps>(
         &'v self,
         sdcard: SdCardRef<'s, CSPIN>,
         dir: &'d mut File,
-    ) -> Result<DirectoryIterator<'s, 'd, 'v, CSPIN>, FatError> {
-        if !dir.is_directory() {
-            return Err(FatError::NotADirectory);
-        }
-
-        Ok(DirectoryIterator { flags: 0, dir, sdcard, vol: self })
+    ) -> DirectoryIterator<'s, 'd, 'v, CSPIN> {
+        // Callers should ensure that `dir` is a directory
+        DirectoryIterator { flags: 0, dir, sdcard, vol: self }
     }
 }

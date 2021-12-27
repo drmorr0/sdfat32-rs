@@ -1,16 +1,16 @@
-mod constants;
-mod data;
+pub mod constants;
 mod debug;
-pub mod mbr;
-pub mod partition;
-pub mod volume;
+mod dir_entry;
+mod file;
+mod mbr;
+mod partition;
+mod volume;
 
 use crate::sdcard::SdCardError;
-pub use data::{
-    DirEntry,
-    File,
-};
+pub use dir_entry::DirEntry;
+pub use file::File;
 pub use mbr::Mbr;
+pub use partition::Partition;
 pub use volume::Volume;
 
 pub enum FatError {
@@ -28,6 +28,8 @@ pub enum FatError {
     ReadError,
     UnsupportedVersion,
     TooManySubdirs,
+    InvalidFilename,
+    FileNotFound,
     Unknown,
 }
 

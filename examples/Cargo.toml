@@ -5,16 +5,16 @@ authors = ["David Morrison <drmorr@evokewonder.com>"]
 edition = "2018"
 
 [[bin]]
+name = "dirops"
+path = "src/dirops.rs"
+
+[[bin]]
 name = "sdinfo"
 path = "src/sdinfo.rs"
 
 [[bin]]
 name = "sdls"
 path = "src/sdls.rs"
-
-[[bin]]
-name = "test"
-path = "src/test.rs"
 
 [features]
 atmega328p = ["atmega-hal/atmega328p", "avr-async/atmega328p"]

@@ -1,27 +1,21 @@
 mod dir_iter;
+mod lfn;
 
 use super::{
     constants::*,
+    dir_entry::DirEntry,
+    file::File,
+    mbr,
+    partition::Partition,
     FatError,
 };
-use crate::{
-    fat32::{
-        mbr,
-        partition::Partition,
-        DirEntry,
-        File,
-    },
-    sdcard::{
-        Block,
-        SdCardRef,
-        DATA_BUFFER,
-    },
+use crate::sdcard::{
+    Block,
+    SdCardRef,
+    DATA_BUFFER,
 };
 use avr_hal_generic::port::PinOps;
-use core::{
-    cmp::min,
-    convert::TryInto,
-};
+use lfn::parse_path_name;
 
 
 pub struct Volume {
@@ -41,6 +35,13 @@ impl Volume {
         })
     }
 
+    pub fn close(&self, file: &mut File) -> Result<(), FatError> {
+        self.check_file(file)?;
+        // TODO sync
+        file.close();
+        Ok(())
+    }
+
     pub fn ls<CSPIN: PinOps, T>(
         &self,
         sdcard: SdCardRef<CSPIN>,
@@ -50,30 +51,54 @@ impl Volume {
         context: &mut T,
         mut func: impl FnMut(&DirEntry, u16, &mut T) -> () + Copy,
     ) -> Result<(), FatError> {
-        if dir.vol_id != self.id {
-            return Err(FatError::VolumeIdMismatch);
-        } else if !dir.is_directory() {
-            return Err(FatError::NotADirectory);
-        }
+        self.check_dir(dir)?;
         self.seek_file(sdcard, dir, 0)?;
 
-        for maybe_file_entry in self.dir_next(sdcard, dir)? {
-            let file_entry = maybe_file_entry?;
-            func(&file_entry, depth, context);
-            if depth_limit > 0 && file_entry.is_directory() && !file_entry.is_self_or_parent() {
-                let mut d = self.open(&file_entry);
+        for maybe_entry in self.dir_next(sdcard, dir) {
+            let entry = maybe_entry?;
+            if entry.is_deleted() {
+                continue;
+            }
+            func(&entry, depth, context);
+            if depth_limit > 0 && entry.is_directory() && !entry.is_self_or_parent() {
+                let mut d = self.open(&entry, O_RDONLY);
                 self.ls(sdcard, &mut d, depth + 1, depth_limit - 1, context, func)?
             }
         }
         Ok(())
     }
 
-    pub fn open(&self, entry: &DirEntry) -> File {
-        File::open(self.id, entry)
+    pub fn open(&self, entry: &DirEntry, flags: u8) -> File {
+        File::open(self.id, entry, flags)
     }
 
-    pub fn open_root(&self) -> File {
-        File::open_root(self.id)
+    pub fn open_by_name<'a, CSPIN: PinOps>(
+        &self,
+        sdcard: SdCardRef<CSPIN>,
+        filename: &'a [u8],
+        flags: u8,
+    ) -> Result<File, FatError> {
+        let mut pos = 0;
+        while filename[pos] == DIR_SEPARATOR {
+            pos += 1
+        }
+        if filename[pos] == 0 {
+            return Ok(self.open_root(flags));
+        }
+        let mut current_dir = self.open_root(O_RDONLY);
+        loop {
+            let (fname, p) = parse_path_name(&filename[pos..filename.len()])?;
+            pos += p;
+            if pos >= filename.len() || filename[pos] == 0 {
+                return self.open_file_from_lfn(sdcard, &mut current_dir, &fname, flags);
+            }
+            let next_dir = self.open_file_from_lfn(sdcard, &mut current_dir, &fname, O_RDONLY)?;
+            current_dir = next_dir;
+        }
+    }
+
+    pub fn open_root(&self, flags: u8) -> File {
+        File::open_root(self.id, flags)
     }
 
     // pub fn read_file<CSPIN: PinOps>(
@@ -124,9 +149,8 @@ impl Volume {
         file: &mut File,
         pos: u32,
     ) -> Result<(), FatError> {
-        if file.vol_id != self.id {
-            return Err(FatError::VolumeIdMismatch);
-        } else if !file.is_open() {
+        self.check_file(file)?;
+        if !file.is_open() {
             return Err(FatError::FileClosed);
         } else if pos == file.pos {
             return Ok(());
@@ -163,6 +187,23 @@ impl Volume {
                 Err(e)
             },
         }
+    }
+
+    #[inline(always)]
+    fn check_dir(&self, dir: &File) -> Result<(), FatError> {
+        self.check_file(dir)?;
+        if !dir.is_directory() {
+            return Err(FatError::NotADirectory);
+        }
+        Ok(())
+    }
+
+    #[inline(always)]
+    fn check_file(&self, file: &File) -> Result<(), FatError> {
+        if file.vol_id != self.id {
+            return Err(FatError::VolumeIdMismatch);
+        }
+        Ok(())
     }
 
     // returns: the position in the sector corresponding to the file.pos

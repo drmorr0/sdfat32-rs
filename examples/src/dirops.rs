@@ -35,9 +35,8 @@ use sdfat32_rs::{
     },
     sdcard::SdCard,
 };
-use ufmt::uwrite;
 
-const RECURSION_DEPTH: u16 = 1;
+const FILENAME: [u8; 10] = ['/' as u8, 'D' as u8, 'C' as u8, 'I' as u8, 'M' as u8, 0, 0, 0, 0, 0];
 
 
 fn print_entry(f: &DirEntry, depth: u16, serial: &mut Usart0<MHz16>) {
@@ -57,7 +56,7 @@ fn print_entry(f: &DirEntry, depth: u16, serial: &mut Usart0<MHz16>) {
     } else {
         serial.write_char('F').void_unwrap();
     }
-    uwrite!(serial, "    {}\n", f.size()).void_unwrap();
+    ufmt::uwrite!(serial, "    {}\n", f.size()).void_unwrap();
 }
 
 
@@ -95,13 +94,17 @@ fn main() -> ! {
     match fat32::Mbr::read_part_info(&sdcard) {
         Ok(part_info) => {
             match fat32::Volume::open_volume(&sdcard, 0, &part_info[0]) {
-                Ok(vol) => {
-                    pm_write!(serial, "volume opened!  Contents:\n").void_unwrap();
-                    let mut root = vol.open_root(O_RDONLY);
-                    if let Err(e) = vol.ls(&sdcard, &mut root, 0, RECURSION_DEPTH, &mut serial, print_entry) {
-                        pm_write!(serial, "Couldn't read directory: {}\n", e as u8).void_unwrap();
+                Ok(vol) => match vol.open_by_name(&sdcard, &FILENAME, O_RDONLY) {
+                    Ok(mut dir) => {
+                        if let Err(e) = vol.ls(&sdcard, &mut dir, 0, 0, &mut serial, print_entry) {
+                            pm_write!(serial, "Couldn't read directory: {}\n", e as u8).void_unwrap();
+                            panic!("");
+                        }
+                    },
+                    Err(e) => {
+                        pm_write!(serial, "Couldn't read file: {}\n", e as u8).void_unwrap();
                         panic!("");
-                    }
+                    },
                 },
                 Err(e) => {
                     pm_write!(serial, "Couldn't read volume: {}\n", e as u8).void_unwrap();
