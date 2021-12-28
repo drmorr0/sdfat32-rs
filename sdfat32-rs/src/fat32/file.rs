@@ -3,6 +3,8 @@ use super::{
     dir_entry::DirEntry,
 };
 
+const O_ACCESS_MODE: u8 = O_RDONLY | O_WRONLY | O_RDWR;
+
 // Clusters can't be usize because the FS address space is larger than 16 bits
 #[derive(Clone, Copy)]
 pub struct File {
@@ -34,13 +36,19 @@ impl File {
     }
 
     pub(crate) fn open(vol_id: u8, entry: &DirEntry, flags: u8) -> File {
+        let fflags = match flags & O_ACCESS_MODE {
+            O_RDONLY => FLAG_READ,
+            O_WRONLY => FLAG_WRITE,
+            O_RDWR => FLAG_READ | FLAG_WRITE,
+            _ => panic!(),
+        };
         File {
             cluster: entry.first_cluster(),
             pos: 0,
             start_cluster: entry.first_cluster(),
             vol_id,
             attributes: entry.file_attributes(),
-            flags,
+            flags: fflags,
             size: entry.size(),
         }
     }

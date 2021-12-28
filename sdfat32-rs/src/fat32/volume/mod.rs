@@ -15,6 +15,10 @@ use crate::sdcard::{
     DATA_BUFFER,
 };
 use avr_hal_generic::port::PinOps;
+use core::{
+    cmp::min,
+    convert::TryInto,
+};
 use lfn::parse_path_name;
 
 
@@ -52,7 +56,7 @@ impl Volume {
         mut func: impl FnMut(&DirEntry, u16, &mut T) -> () + Copy,
     ) -> Result<(), FatError> {
         self.check_dir(dir)?;
-        self.seek_file(sdcard, dir, 0)?;
+        self.seek(sdcard, dir, 0)?;
 
         for maybe_entry in self.dir_next(sdcard, dir) {
             let entry = maybe_entry?;
@@ -79,7 +83,7 @@ impl Volume {
         flags: u8,
     ) -> Result<File, FatError> {
         let mut pos = 0;
-        while filename[pos] == DIR_SEPARATOR {
+        while pos < filename.len() && filename[pos] == DIR_SEPARATOR {
             pos += 1
         }
         if filename[pos] == 0 {
@@ -101,54 +105,45 @@ impl Volume {
         File::open_root(self.id, flags)
     }
 
-    // pub fn read_file<CSPIN: PinOps>(
-    //     &mut self,
-    //     sdcard: SdCardRef<CSPIN>,
-    //     file: &mut File,
-    //     buffer: &mut [u8],
-    // ) -> Result<usize, FatError> {
-    //     if file.vol_id != self.id {
-    //         return Err(FatError::VolumeIdMismatch);
-    //     } else if !file.is_readable() {
-    //         return Err(FatError::ReadError);
-    //     }
-
-    //     let mut buf_pos: usize = 0;
-
-    //     // We can't read in more than usize bytes so it's fine if num_bytes is a usize, not a u32
-    //     let bytes_to_eof = file.size() - file.pos;
-    //     let num_bytes: usize = if buffer.len() as u32 > bytes_to_eof {
-    //         bytes_to_eof.try_into().unwrap()
-    //     } else {
-    //         buffer.len()
-    //     };
-
-    //     let mut remainder = num_bytes;
-    //     while remainder > 0 {
-    //         let (sector, sector_pos) = self.load_sector_for_file(sdcard, file)?;
-    //         let n: usize = if sector_pos != 0 || remainder < BYTES_PER_SECTOR {
-    //             // Safe to do this cast because the max value is BYTES_PER_SECTOR
-    //             min(BYTES_PER_SECTOR - sector_pos, remainder)
-    //         } else {
-    //             BYTES_PER_SECTOR
-    //         };
-
-    //         buffer[buf_pos..buf_pos + n].copy_from_slice(&sector[sector_pos..sector_pos + n]);
-
-    //         buf_pos += n;
-    //         file.pos += n as u32;
-    //         remainder -= n;
-    //     }
-
-    //     Ok(num_bytes - remainder)
-    // }
-
-    pub fn seek_file<CSPIN: PinOps>(
-        &self,
+    pub fn read<CSPIN: PinOps>(
+        &mut self,
         sdcard: SdCardRef<CSPIN>,
         file: &mut File,
-        pos: u32,
-    ) -> Result<(), FatError> {
+        buffer: &mut [u8],
+    ) -> Result<usize, FatError> {
+        self.check_file(file)?;
+        if !file.is_readable() {
+            return Err(FatError::ReadError);
+        }
+
+        let mut buf_pos: usize = 0;
+
+        // We can't read in more than usize bytes so it's fine if num_bytes is a usize, not a u32
+        let bytes_to_eof = file.size() - file.pos;
+        let num_bytes: usize =
+            if buffer.len() as u32 > bytes_to_eof { bytes_to_eof.try_into().unwrap() } else { buffer.len() };
+
+        let mut remainder = num_bytes;
+        while remainder > 0 {
+            let (sector_raw, sector_pos) = self.load_sector_for_file::<_, SECTOR>(sdcard, file)?;
+            let n: usize = if sector_pos != 0 || remainder < BYTES_PER_SECTOR {
+                // Safe to do this cast because the max value is BYTES_PER_SECTOR
+                min(BYTES_PER_SECTOR - sector_pos, remainder)
+            } else {
+                BYTES_PER_SECTOR
+            };
+
+            buffer[buf_pos..buf_pos + n].copy_from_slice(&sector_raw.get()[sector_pos..sector_pos + n]);
+
+            buf_pos += n;
+            file.pos += n as u32;
+            remainder -= n;
+        }
+
+        Ok(num_bytes - remainder)
+    }
+
+    pub fn seek<CSPIN: PinOps>(&self, sdcard: SdCardRef<CSPIN>, file: &mut File, pos: u32) -> Result<(), FatError> {
         self.check_file(file)?;
         if !file.is_open() {
             return Err(FatError::FileClosed);

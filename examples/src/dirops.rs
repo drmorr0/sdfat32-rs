@@ -31,33 +31,15 @@ use sdfat32_rs::{
     fat32::{
         self,
         constants::O_RDONLY,
-        DirEntry,
     },
     sdcard::SdCard,
 };
 
-const FILENAME: [u8; 10] = ['/' as u8, 'D' as u8, 'C' as u8, 'I' as u8, 'M' as u8, 0, 0, 0, 0, 0];
-
-
-fn print_entry(f: &DirEntry, depth: u16, serial: &mut Usart0<MHz16>) {
-    if f.is_self_or_parent() {
-        return;
-    }
-
-    for _ in 0..depth {
-        serial.write_char(' ').void_unwrap();
-    }
-
-    for c in f.name() {
-        serial.write_char(*c as char).void_unwrap();
-    }
-    if f.is_directory() {
-        serial.write_char('D').void_unwrap();
-    } else {
-        serial.write_char('F').void_unwrap();
-    }
-    ufmt::uwrite!(serial, "    {}\n", f.size()).void_unwrap();
-}
+const FILENAME: [u8; 34] = [
+    '/' as u8, 'a' as u8, ' ' as u8, 'r' as u8, 'e' as u8, 'a' as u8, 'l' as u8, 'l' as u8, 'y' as u8, ' ' as u8,
+    'l' as u8, 'o' as u8, 'n' as u8, 'g' as u8, '+' as u8, 'f' as u8, 'i' as u8, 'l' as u8, 'n' as u8, 'a' as u8,
+    'm' as u8, 'e' as u8, '.' as u8, 't' as u8, 'x' as u8, 't' as u8, 'l' as u8, 'o' as u8, 'l' as u8, 0, 0, 0, 0, 0,
+];
 
 
 #[arduino_hal::entry]
@@ -94,11 +76,19 @@ fn main() -> ! {
     match fat32::Mbr::read_part_info(&sdcard) {
         Ok(part_info) => {
             match fat32::Volume::open_volume(&sdcard, 0, &part_info[0]) {
-                Ok(vol) => match vol.open_by_name(&sdcard, &FILENAME, O_RDONLY) {
-                    Ok(mut dir) => {
-                        if let Err(e) = vol.ls(&sdcard, &mut dir, 0, 0, &mut serial, print_entry) {
-                            pm_write!(serial, "Couldn't read directory: {}\n", e as u8).void_unwrap();
-                            panic!("");
+                Ok(mut vol) => match vol.open_by_name(&sdcard, &FILENAME, O_RDONLY) {
+                    Ok(mut file) => {
+                        let mut buffer = [0u8; 40];
+                        match vol.read(&sdcard, &mut file, &mut buffer) {
+                            Ok(n) => {
+                                for i in 0..n {
+                                    serial.write_char(buffer[i] as char).void_unwrap();
+                                }
+                            },
+                            Err(e) => {
+                                pm_write!(serial, "Couldn't read file contents: {}\n", e as u8).void_unwrap();
+                                panic!("");
+                            },
                         }
                     },
                     Err(e) => {

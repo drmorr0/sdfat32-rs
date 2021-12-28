@@ -19,17 +19,17 @@ struct DirEntryLFN {
     order: u8,
     unicode1: [u8; 10],
     attributes: u8,
-    always_zero_1: u8,
+    _always_zero_1: u8,
     checksum: u8,
     unicode2: [u8; 12],
-    always_zero_2: [u8; 2],
+    _always_zero_2: [u8; 2],
     unicode3: [u8; 4],
 }
 
 impl DirEntryLFN {
     #[inline(always)]
-    fn sequence_num(&self) -> u8 {
-        self.order & 0x1f
+    fn sequence_num(&self) -> usize {
+        (self.order & 0x1f) as usize
     }
 
     #[inline(always)]
@@ -69,53 +69,57 @@ impl<'a> LFN<'a> {
             last_dot_pos -= 1;
         }
 
-        for mut path_pos in path_pos..path_end {
-            let mut c = path[path_pos];
-            if c == DOT && path_pos == last_dot_pos {
-                // We're in the extension now
-                sfn_pos = 8;
-                sfn_end = 10;
-                in_ext = true;
-            } else {
-                if c == SPACE || c == DOT {
-                    // Skip spaces and periods (which the original SdFat lib doesn't seem to do...?)
-                    is83 = false;
-                    continue;
-                } else if sfn_reserved_char(c) {
-                    // Replace reserved characters with underscores in the SFN
-                    is83 = false;
-                    // Skip UTF-8 trailing characters (I don't know what this means)
-                    if (c & 0xc0) == 0x80 {
-                        continue;
+        'outer: while path_pos < path_end {
+            loop {
+                let mut c = path[path_pos];
+                if c == DOT && path_pos == last_dot_pos {
+                    // We're in the extension now
+                    sfn_pos = 8;
+                    sfn_end = 10;
+                    in_ext = true;
+                } else {
+                    if c == SPACE || c == DOT {
+                        // Skip spaces and periods (which the original SdFat lib doesn't seem to do...?)
+                        is83 = false;
+                        break;
+                    } else if sfn_reserved_char(c) {
+                        // Replace reserved characters with underscores in the SFN
+                        is83 = false;
+                        // Skip UTF-8 trailing characters (I don't know what this means)
+                        if (c & 0xc0) == 0x80 {
+                            continue;
+                        }
+                        c = '_' as u8;
                     }
-                    c = '_' as u8;
-                }
 
-                if sfn_pos > sfn_end {
-                    is83 = false;
-                    if in_ext || path_pos > last_dot_pos {
-                        // all done; either the extension's longer than three characters
-                        // or there is no extension
+                    if sfn_pos > sfn_end {
+                        is83 = false;
+                        if in_ext || path_pos > last_dot_pos {
+                            // all done; either the extension's longer than three characters
+                            // or there is no extension
+                            break 'outer;
+                        }
+                        // skip to the last dot (i.e., the start of the extension)
+                        path_pos = last_dot_pos - 1;
                         break;
                     }
-                    // skip to the last dot (i.e., the start of the extension)
-                    path_pos = last_dot_pos - 1;
-                    continue;
-                }
 
-                if (c as char).is_lowercase() {
-                    c -= 32; // Offset between 'A' and 'a' in the ASCII table
-                    lc_parts |= if in_ext { FNAME_FLAG_LC_EXT } else { FNAME_FLAG_LC_BASE }
-                } else {
-                    uc_parts |= if in_ext { FNAME_FLAG_LC_EXT } else { FNAME_FLAG_LC_BASE }
-                }
+                    if (c as char).is_lowercase() {
+                        c -= 32; // Offset between 'A' and 'a' in the ASCII table
+                        lc_parts |= if in_ext { FNAME_FLAG_LC_EXT } else { FNAME_FLAG_LC_BASE }
+                    } else {
+                        uc_parts |= if in_ext { FNAME_FLAG_LC_EXT } else { FNAME_FLAG_LC_BASE }
+                    }
 
-                sfn[sfn_pos] = c;
-                sfn_pos += 1;
-                if sfn_pos < 7 {
-                    trunc_pos = sfn_pos;
+                    sfn[sfn_pos] = c;
+                    sfn_pos += 1;
+                    if sfn_pos < 7 {
+                        trunc_pos = sfn_pos;
+                    }
                 }
+                break;
             }
+            path_pos += 1;
         }
 
         if is83 {
@@ -129,8 +133,8 @@ impl<'a> LFN<'a> {
     }
 
     #[inline(always)]
-    fn lfn_entry_count(&self) -> u8 {
-        ((self.path_end + 12) / 13) as u8
+    fn lfn_entry_count(&self) -> usize {
+        (self.path_end + 12) / 13
     }
 }
 
@@ -139,7 +143,7 @@ pub(crate) fn parse_path_name<'a>(path: &'a [u8]) -> Result<(LFN<'a>, usize), Fa
     let mut end = 0;
     while pos < path.len() && path[pos] > 0 && path[pos] != DIR_SEPARATOR {
         if path[pos] >= 0x80 || lfn_reserved_char(path[pos]) {
-            return Err(FatError::InvalidFilename);
+            return Err(FatError::ParsePathError);
         }
         if path[pos] != DOT && path[pos] != SPACE {
             end = pos + 1;
@@ -148,10 +152,12 @@ pub(crate) fn parse_path_name<'a>(path: &'a [u8]) -> Result<(LFN<'a>, usize), Fa
     }
 
     if end == 0 || end > MAX_LFN_LEN {
-        return Err(FatError::InvalidFilename);
+        return Err(FatError::ParsePathError);
     }
 
-    while pos < path.len() && path[pos] > 0 && path[pos] != SPACE && path[pos] != DIR_SEPARATOR {
+    // Skip to the start of the next component of the path; we broke the last loop when we
+    // a) hit the end, or b) saw a separator, so we're still at a separator here
+    while pos < path.len() && path[pos] > 0 && (path[pos] == SPACE || path[pos] == DIR_SEPARATOR) {
         pos += 1;
     }
 
@@ -169,8 +175,8 @@ impl Volume {
         self.check_dir(dir)?;
         let mut in_lfn_sequence: bool = false;
         let mut expected_checksum: u8 = 0;
-        let mut expected_next_sequence_num: u8 = 0;
-        self.seek_file(sdcard, dir, 0)?;
+        let mut expected_next_sequence_num: usize = 0;
+        self.seek(sdcard, dir, 0)?;
 
         // Try to determine whether the current DirEntry matches up with the provided filename
         for maybe_entry in self.dir_next(sdcard, dir) {
@@ -186,11 +192,12 @@ impl Volume {
 
                     // If the sequence number is not what we expect, or this isn't the last entry
                     // in the sequence, this dir-entry can't match fname, so continue
-                    if lfn_sequence_num != fname.lfn_entry_count() || lfn_entry.is_last_in_sequence() {
+                    if lfn_sequence_num != fname.lfn_entry_count() || !lfn_entry.is_last_in_sequence() {
                         continue;
                     }
-                    expected_next_sequence_num = fname.lfn_entry_count() - 1;
+                    expected_next_sequence_num = fname.lfn_entry_count();
                     expected_checksum = lfn_entry.checksum;
+                    in_lfn_sequence = true;
                 } else if lfn_sequence_num != expected_next_sequence_num || lfn_entry.checksum != expected_checksum {
                     // We are in the middle of an LFN sequence, but the order doesn't match or the
                     // checksum doesn't match (I guess this could happen if it was written by
@@ -200,29 +207,53 @@ impl Volume {
                 }
                 expected_next_sequence_num -= 1;
 
-                if expected_next_sequence_num == 0 {
-                    unimplemented!(); // TODO compare the long names
+                if !compare_lfn_name_segment(&lfn_entry, fname) {
+                    in_lfn_sequence = false;
+                    continue;
                 }
             } else if entry.is_file_or_subdir() {
-                if in_lfn_sequence {
-                    // This is the "real" entry at the end of a LFN sequence; confirm that
-                    // it's what we expected, and then open ze file!
-                    if (expected_next_sequence_num == 0) && entry.checksum() == expected_checksum {
-                        unimplemented!();
-                    }
-                    return Err(FatError::InvalidFilename); // Oops
-                } else {
-                    // This is just a regular "short" filename; check if the names match,
-                    // and that we're not a long filename in disguise, then open ze file!
-                    if entry.name() == fname.sfn && fname.flags & FNAME_FLAG_TRUNCATED == 0 {
-                        return Ok(self.open(&entry, flags));
-                    }
+                // Case 1: This is the "real" entry at the end of a LFN sequence; confirm that
+                //         it's what we expected, and then open ze file!
+                // Case 2: This is just a regular "short" filename; check if the names match,
+                //         and that we're not a long filename in disguise, then open ze file!
+                if (in_lfn_sequence && (expected_next_sequence_num == 0) && entry.checksum() == expected_checksum)
+                    || (entry.name() == fname.sfn && fname.flags & FNAME_FLAG_TRUNCATED == 0)
+                {
+                    return Ok(self.open(&entry, flags));
                 }
             } else {
                 in_lfn_sequence = false;
             }
         }
         Err(FatError::FileNotFound)
+    }
+}
+
+fn compare_lfn_name_segment(lfn_entry: &DirEntryLFN, fname: &LFN) -> bool {
+    for i in 0..13 {
+        let c = (get_lfn_char(lfn_entry, i) as char).to_ascii_uppercase();
+        let fname_pos = (lfn_entry.sequence_num() - 1) * 13 + i; // LFN entries are 1-indexed
+        let fname_c = (fname.path[fname_pos] as char).to_ascii_uppercase();
+
+        // LFN entries and fname entries should be zero-terminated, so check one past the end
+        if fname_pos > fname.path_end {
+            break;
+        } else if c != fname_c {
+            return false;
+        }
+    }
+    return true;
+}
+
+fn get_lfn_char(lfn_entry: &DirEntryLFN, i: usize) -> u8 {
+    if i < 5 {
+        lfn_entry.unicode1[2 * i]
+    } else if i < 11 {
+        lfn_entry.unicode2[2 * i - 10]
+    } else if i < 13 {
+        lfn_entry.unicode3[2 * i - 22]
+    } else {
+        0
     }
 }
 
