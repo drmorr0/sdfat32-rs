@@ -3,7 +3,11 @@ mod lfn;
 
 use super::{
     constants::*,
-    dir_entry::DirEntry,
+    dir_entry::{
+        DirEntry,
+        LFN,
+        SFN,
+    },
     file::File,
     mbr,
     partition::Partition,
@@ -64,15 +68,17 @@ impl Volume {
                 continue;
             }
             func(&entry, depth, context);
-            if depth_limit > 0 && entry.is_directory() && !entry.is_self_or_parent() {
-                let mut d = self.open(&entry, O_RDONLY);
-                self.ls(sdcard, &mut d, depth + 1, depth_limit - 1, context, func)?
+            if let DirEntry::Short(sfn) = entry {
+                if depth_limit > 0 && sfn.is_directory() && !sfn.is_self_or_parent() {
+                    let mut d = self.open(&sfn, O_RDONLY);
+                    self.ls(sdcard, &mut d, depth + 1, depth_limit - 1, context, func)?;
+                }
             }
         }
         Ok(())
     }
 
-    pub fn open(&self, entry: &DirEntry, flags: u8) -> File {
+    pub fn open(&self, entry: &SFN, flags: u8) -> File {
         File::open(self.id, entry, flags)
     }
 

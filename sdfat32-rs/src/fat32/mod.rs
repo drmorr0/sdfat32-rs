@@ -28,6 +28,7 @@ pub enum FatError {
     ReadError,
     UnsupportedVersion,
     TooManySubdirs,
+    LfnParseError,
     ParsePathError,
     FileNotFound,
     Unknown,

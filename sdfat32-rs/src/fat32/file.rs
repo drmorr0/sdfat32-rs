@@ -1,6 +1,6 @@
 use super::{
     constants::*,
-    dir_entry::DirEntry,
+    dir_entry::SFN,
 };
 
 const O_ACCESS_MODE: u8 = O_RDONLY | O_WRONLY | O_RDWR;
@@ -35,7 +35,15 @@ impl File {
         self.flags = 0;
     }
 
-    pub(crate) fn open(vol_id: u8, entry: &DirEntry, flags: u8) -> File {
+    pub(crate) fn open(vol_id: u8, entry: &SFN, flags: u8) -> File {
+        Self::open_helper(vol_id, entry.first_cluster(), entry.file_attributes(), flags, entry.size())
+    }
+
+    pub(crate) fn open_root(vol_id: u8, flags: u8) -> File {
+        Self::open_helper(vol_id, ROOT_CLUSTER, ATTR_ROOT, flags, 0)
+    }
+
+    fn open_helper(vol_id: u8, start_cluster: u32, attributes: u8, flags: u8, size: u32) -> File {
         let fflags = match flags & O_ACCESS_MODE {
             O_RDONLY => FLAG_READ,
             O_WRONLY => FLAG_WRITE,
@@ -43,25 +51,13 @@ impl File {
             _ => panic!(),
         };
         File {
-            cluster: entry.first_cluster(),
+            cluster: start_cluster,
             pos: 0,
-            start_cluster: entry.first_cluster(),
+            start_cluster,
             vol_id,
-            attributes: entry.file_attributes(),
+            attributes,
             flags: fflags,
-            size: entry.size(),
-        }
-    }
-
-    pub(crate) fn open_root(vol_id: u8, flags: u8) -> File {
-        File {
-            cluster: ROOT_CLUSTER,
-            pos: 0,
-            start_cluster: ROOT_CLUSTER,
-            vol_id,
-            attributes: ATTR_ROOT,
-            flags,
-            size: 0,
+            size,
         }
     }
 

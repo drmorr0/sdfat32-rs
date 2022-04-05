@@ -11,8 +11,63 @@ const DIRENT_ATTR_ARCHIVE: u8 = 0x20;
 const DIRENT_ATTR_DEVICE: u8 = 0x40;
 const DIRENT_ATTR_LONG_NAME: u8 = 0x0f;
 
+pub enum DirEntry {
+    Long(LFN),
+    Short(SFN),
+}
+
+impl DirEntry {
+    #[inline(always)]
+    pub fn is_deleted(&self) -> bool {
+        match self {
+            DirEntry::Long(lfn) => lfn.sequence_byte == DELETED,
+            DirEntry::Short(sfn) => sfn.name[0] == DELETED,
+        }
+    }
+}
+
+pub struct LFN {
+    sequence_byte: u8,
+    unicode1: [u8; 10],
+    attributes: u8,
+    _always_zero_1: u8,
+    checksum: u8,
+    unicode2: [u8; 12],
+    _always_zero_2: [u8; 2],
+    unicode3: [u8; 4],
+}
+
+impl LFN {
+    pub fn get_char(&self, i: usize) -> u8 {
+        if i < 5 {
+            self.unicode1[2 * i]
+        } else if i < 11 {
+            self.unicode2[2 * i - 10]
+        } else if i < 13 {
+            self.unicode3[2 * i - 22]
+        } else {
+            0
+        }
+    }
+
+    #[inline(always)]
+    pub(crate) fn checksum(&self) -> u8 {
+        self.checksum
+    }
+
+    #[inline(always)]
+    pub(crate) fn sequence_num(&self) -> usize {
+        (self.sequence_byte & 0x1f) as usize
+    }
+
+    #[inline(always)]
+    pub(crate) fn is_last_in_sequence(&self) -> bool {
+        self.sequence_byte & 0x40 > 0
+    }
+}
+
 #[derive(Clone, Copy)]
-pub struct DirEntry {
+pub struct SFN {
     name: [u8; 11],
     attributes: u8,
     case_flags: u8,
@@ -31,16 +86,11 @@ const SELF_DIR: [u8; 11] = [DOT, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE
 const PARENT_DIR: [u8; 11] = [DOT, DOT, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE];
 const DELETED: u8 = 0xe5;
 
-impl DirEntry {
+impl SFN {
     #[inline(always)]
     pub fn file_attributes(&self) -> u8 {
         // Attributes to pass on from the directory entry to the file object
         self.attributes & (DIRENT_ATTR_RO | DIRENT_ATTR_HIDDEN | DIRENT_ATTR_SYSTEM | DIRENT_ATTR_SUBDIR)
-    }
-
-    #[inline(always)]
-    pub fn is_deleted(&self) -> bool {
-        self.name[0] == DELETED
     }
 
     #[inline(always)]

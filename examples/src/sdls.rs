@@ -40,24 +40,28 @@ use ufmt::uwrite;
 const RECURSION_DEPTH: u16 = 1;
 
 
-fn print_entry(f: &DirEntry, depth: u16, serial: &mut Usart0<MHz16>) {
-    if f.is_self_or_parent() {
-        return;
-    }
+fn print_entry(entry: &DirEntry, depth: u16, serial: &mut Usart0<MHz16>) {
+    match entry {
+        DirEntry::Long(lfn) => (),
+        DirEntry::Short(sfn) => {
+            if sfn.is_self_or_parent() {
+                return;
+            }
 
-    for _ in 0..depth {
-        serial.write_char(' ').void_unwrap();
+            for _ in 0..depth {
+                serial.write_char(' ').void_unwrap();
+            }
+            for c in sfn.name() {
+                serial.write_char(*c as char).void_unwrap();
+            }
+            if sfn.is_directory() {
+                serial.write_char('D').void_unwrap();
+            } else {
+                serial.write_char('F').void_unwrap();
+            }
+            uwrite!(serial, "    {}\n", sfn.size()).void_unwrap();
+        },
     }
-
-    for c in f.name() {
-        serial.write_char(*c as char).void_unwrap();
-    }
-    if f.is_directory() {
-        serial.write_char('D').void_unwrap();
-    } else {
-        serial.write_char('F').void_unwrap();
-    }
-    uwrite!(serial, "    {}\n", f.size()).void_unwrap();
 }
 
 
