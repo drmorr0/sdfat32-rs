@@ -41,18 +41,29 @@ const RECURSION_DEPTH: u16 = 1;
 
 
 fn print_entry(entry: &DirEntry, depth: u16, serial: &mut Usart0<MHz16>) {
-    match entry {
-        DirEntry::Long(lfn) => (),
-        DirEntry::Short(sfn) => {
-            if sfn.is_self_or_parent() {
-                return;
-            }
+    if entry.is_self_or_parent() {
+        return;
+    }
+    for _ in 0..depth {
+        serial.write_char(' ').void_unwrap();
+    }
 
-            for _ in 0..depth {
-                serial.write_char(' ').void_unwrap();
+    match entry {
+        DirEntry::Long(lfn, _) => {
+            for i in 0..13 {
+                let c = lfn.get_char(i);
+                if c == 0x0 || c == 0xff {
+                    break;
+                } else {
+                    serial.write_char(c as char).void_unwrap();
+                }
             }
-            for c in sfn.name() {
-                serial.write_char(*c as char).void_unwrap();
+        },
+        DirEntry::Short(sfn, had_lfn) => {
+            if !had_lfn {
+                for c in sfn.name() {
+                    serial.write_char(*c as char).void_unwrap();
+                }
             }
             if sfn.is_directory() {
                 serial.write_char('D').void_unwrap();
@@ -102,7 +113,7 @@ fn main() -> ! {
                 Ok(vol) => {
                     pm_write!(serial, "volume opened!  Contents:\n").void_unwrap();
                     let mut root = vol.open_root(O_RDONLY);
-                    if let Err(e) = vol.ls(&sdcard, &mut root, 0, RECURSION_DEPTH, &mut serial, print_entry) {
+                    if let Err(e) = vol.ls(&sdcard, &mut root, false, 0, RECURSION_DEPTH, &mut serial, print_entry) {
                         pm_write!(serial, "Couldn't read directory: {}\n", e as u8).void_unwrap();
                         panic!("");
                     }

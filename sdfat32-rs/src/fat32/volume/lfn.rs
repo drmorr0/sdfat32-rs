@@ -165,12 +165,12 @@ impl Volume {
         for maybe_entry in self.dir_next(sdcard, dir) {
             let entry = maybe_entry?;
             match entry {
-                DirEntry::Long(lfn) => {
+                DirEntry::Long(lfn, _) => {
                     // if fname.checksum() != lfn.checksum() || !compare_lfn_name_segment(&lfn,
                     // fname) {     continue;
                     // }
                 },
-                DirEntry::Short(sfn) => {
+                DirEntry::Short(sfn, _) => {
                     // Case 1: This is the "real" entry at the end of a LFN sequence; confirm that
                     //         it's what we expected, and then open ze file!
                     // Case 2: This is just a regular "short" filename; check if the names match,

@@ -54,6 +54,7 @@ impl Volume {
         &self,
         sdcard: SdCardRef<CSPIN>,
         dir: &mut File,
+        show_hidden: bool,
         depth: u16,
         depth_limit: u16,
         context: &mut T,
@@ -64,14 +65,14 @@ impl Volume {
 
         for maybe_entry in self.dir_next(sdcard, dir) {
             let entry = maybe_entry?;
-            if entry.is_deleted() {
+            if entry.is_deleted() || (entry.is_hidden() && !show_hidden) {
                 continue;
             }
             func(&entry, depth, context);
-            if let DirEntry::Short(sfn) = entry {
+            if let DirEntry::Short(sfn, _) = entry {
                 if depth_limit > 0 && sfn.is_directory() && !sfn.is_self_or_parent() {
                     let mut d = self.open(&sfn, O_RDONLY);
-                    self.ls(sdcard, &mut d, depth + 1, depth_limit - 1, context, func)?;
+                    self.ls(sdcard, &mut d, show_hidden, depth + 1, depth_limit - 1, context, func)?;
                 }
             }
         }

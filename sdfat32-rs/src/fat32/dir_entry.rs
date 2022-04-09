@@ -12,16 +12,32 @@ const DIRENT_ATTR_DEVICE: u8 = 0x40;
 const DIRENT_ATTR_LONG_NAME: u8 = 0x0f;
 
 pub enum DirEntry {
-    Long(LFN),
-    Short(SFN),
+    Long(LFN, u8),
+    Short(SFN, bool),
 }
 
 impl DirEntry {
     #[inline(always)]
+    pub fn is_self_or_parent(&self) -> bool {
+        match self {
+            DirEntry::Long(lfn, _) => false,
+            DirEntry::Short(sfn, _) => sfn.is_self_or_parent(),
+        }
+    }
+
+    #[inline(always)]
     pub fn is_deleted(&self) -> bool {
         match self {
-            DirEntry::Long(lfn) => lfn.sequence_byte == DELETED,
-            DirEntry::Short(sfn) => sfn.name[0] == DELETED,
+            DirEntry::Long(lfn, _) => lfn.sequence_byte == DELETED,
+            DirEntry::Short(sfn, _) => sfn.name[0] == DELETED,
+        }
+    }
+
+    #[inline(always)]
+    pub fn is_hidden(&self) -> bool {
+        match self {
+            DirEntry::Long(lfn, attr) => attr & DIRENT_ATTR_HIDDEN > 0,
+            DirEntry::Short(sfn, _) => sfn.is_hidden(),
         }
     }
 }
@@ -29,7 +45,7 @@ impl DirEntry {
 pub struct LFN {
     sequence_byte: u8,
     unicode1: [u8; 10],
-    attributes: u8,
+    _always_0x0f: u8,
     _always_zero_1: u8,
     checksum: u8,
     unicode2: [u8; 12],
@@ -91,6 +107,11 @@ impl SFN {
     pub fn file_attributes(&self) -> u8 {
         // Attributes to pass on from the directory entry to the file object
         self.attributes & (DIRENT_ATTR_RO | DIRENT_ATTR_HIDDEN | DIRENT_ATTR_SYSTEM | DIRENT_ATTR_SUBDIR)
+    }
+
+    #[inline(always)]
+    pub fn is_hidden(&self) -> bool {
+        self.attributes & DIRENT_ATTR_HIDDEN > 0
     }
 
     #[inline(always)]
