@@ -14,6 +14,7 @@ use core::mem;
 pub(crate) struct DirectoryIterator<'d, 'v: 'd, 's: 'v, CSPIN: PinOps> {
     dir: &'d mut File,
     lfn_checksum: u8,
+    lfn_size: usize,
     lfn_next: usize,
     sfn_attr: u8,
     sdcard: SdCardRef<'s, CSPIN>,
@@ -65,7 +66,8 @@ impl<CSPIN: PinOps> Iterator for DirectoryIterator<'_, '_, '_, CSPIN> {
                         // We know whether we've hit the last logical entry before based on whether
                         // we're currently storing a checksum to compare against or not.
                         if lfn_entry.is_last_in_sequence() {
-                            self.dir.pos += (lfn_entry.sequence_num() as u32) * 32;
+                            self.lfn_size = lfn_entry.sequence_num();
+                            self.dir.pos += (self.lfn_size as u32) * 32;
                             if self.lfn_checksum == 0 {
                                 self.lfn_checksum = lfn_entry.checksum();
                                 self.sfn_attr = 0x0f;
@@ -76,7 +78,7 @@ impl<CSPIN: PinOps> Iterator for DirectoryIterator<'_, '_, '_, CSPIN> {
                             self.dir.pos -= 32;
                             self.lfn_next += 1;
                         }
-                        return Some(Ok(DirEntry::Long(lfn_entry, self.sfn_attr)));
+                        return Some(Ok(DirEntry::Long(lfn_entry, self.lfn_size, self.sfn_attr)));
                     } else {
                         let mut has_lfn = false;
                         if self.lfn_checksum != 0 {
@@ -90,6 +92,7 @@ impl<CSPIN: PinOps> Iterator for DirectoryIterator<'_, '_, '_, CSPIN> {
                             }
                             self.lfn_checksum = 0;
                             self.lfn_next = 0;
+                            self.lfn_size = 0;
                             has_lfn = true;
                         }
                         self.dir.pos += 32;
@@ -113,6 +116,7 @@ impl Volume {
             dir,
             lfn_checksum: 0,
             lfn_next: 0,
+            lfn_size: 0,
             sfn_attr: 0,
             sdcard,
             vol: self,

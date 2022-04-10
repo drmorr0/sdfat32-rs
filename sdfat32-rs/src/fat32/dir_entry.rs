@@ -12,7 +12,7 @@ const DIRENT_ATTR_DEVICE: u8 = 0x40;
 const DIRENT_ATTR_LONG_NAME: u8 = 0x0f;
 
 pub enum DirEntry {
-    Long(LFN, u8),
+    Long(LFN, usize, u8),
     Short(SFN, bool),
 }
 
@@ -20,7 +20,7 @@ impl DirEntry {
     #[inline(always)]
     pub fn is_self_or_parent(&self) -> bool {
         match self {
-            DirEntry::Long(lfn, _) => false,
+            DirEntry::Long(..) => false,
             DirEntry::Short(sfn, _) => sfn.is_self_or_parent(),
         }
     }
@@ -28,7 +28,7 @@ impl DirEntry {
     #[inline(always)]
     pub fn is_deleted(&self) -> bool {
         match self {
-            DirEntry::Long(lfn, _) => lfn.sequence_byte == DELETED,
+            DirEntry::Long(lfn, ..) => lfn.sequence_byte == DELETED,
             DirEntry::Short(sfn, _) => sfn.name[0] == DELETED,
         }
     }
@@ -36,7 +36,7 @@ impl DirEntry {
     #[inline(always)]
     pub fn is_hidden(&self) -> bool {
         match self {
-            DirEntry::Long(lfn, attr) => attr & DIRENT_ATTR_HIDDEN > 0,
+            DirEntry::Long(_, _, attr) => attr & DIRENT_ATTR_HIDDEN > 0,
             DirEntry::Short(sfn, _) => sfn.is_hidden(),
         }
     }

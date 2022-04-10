@@ -49,7 +49,7 @@ fn print_entry(entry: &DirEntry, depth: u16, serial: &mut Usart0<MHz16>) {
     }
 
     match entry {
-        DirEntry::Long(lfn, _) => {
+        DirEntry::Long(lfn, ..) => {
             for i in 0..13 {
                 let c = lfn.get_char(i);
                 if c == 0x0 || c == 0xff {

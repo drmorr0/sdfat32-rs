@@ -111,8 +111,7 @@ impl<'a> Fname<'a> {
 
     pub(crate) fn checksum(&self) -> u8 {
         let mut sum: u8 = 0;
-        for i in 0..self.path_end {
-            let c = self.path[i];
+        for c in self.sfn {
             sum = (((sum & 1) << 7) | (sum >> 1)) + c;
         }
         sum
@@ -162,25 +161,33 @@ impl Volume {
         self.seek(sdcard, dir, 0)?;
 
         // Try to determine whether the current DirEntry matches up with the provided filename
+        let mut lfn_match = true;
         for maybe_entry in self.dir_next(sdcard, dir) {
             let entry = maybe_entry?;
             match entry {
-                DirEntry::Long(lfn, _) => {
-                    // if fname.checksum() != lfn.checksum() || !compare_lfn_name_segment(&lfn,
-                    // fname) {     continue;
-                    // }
+                DirEntry::Long(lfn, entry_count, _) => {
+                    if !lfn_match {
+                        continue;
+                    }
+                    if fname.lfn_entry_count() != entry_count
+                        || fname.checksum() != lfn.checksum()
+                        || !compare_lfn_name_segment(&lfn, fname)
+                    {
+                        lfn_match = false;
+                    }
                 },
-                DirEntry::Short(sfn, _) => {
+                DirEntry::Short(sfn, has_lfn) => {
                     // Case 1: This is the "real" entry at the end of a LFN sequence; confirm that
                     //         it's what we expected, and then open ze file!
                     // Case 2: This is just a regular "short" filename; check if the names match,
                     //         and that we're not a long filename in disguise, then open ze file!
-                    // if sfn.checksum() == fname.checksum()
-                    //     && sfn.name() == fname.sfn
-                    //     && fname.flags & FNAME_FLAG_TRUNCATED == 0
-                    if sfn.name() == fname.sfn && fname.flags & FNAME_FLAG_TRUNCATED == 0 {
+                    if (has_lfn && lfn_match && sfn.checksum() == fname.checksum())
+                        || (sfn.name() == fname.sfn && fname.flags & FNAME_FLAG_TRUNCATED == 0)
+                    {
                         return Ok(self.open(&sfn, flags));
                     }
+
+                    lfn_match = true;
                 },
             }
         }

@@ -76,25 +76,34 @@ fn main() -> ! {
     match fat32::Mbr::read_part_info(&sdcard) {
         Ok(part_info) => {
             match fat32::Volume::open_volume(&sdcard, 0, &part_info[0]) {
-                Ok(mut vol) => match vol.open_by_name(&sdcard, &FILENAME, O_RDONLY) {
-                    Ok(mut file) => {
-                        let mut buffer = [0u8; 40];
-                        match vol.read(&sdcard, &mut file, &mut buffer) {
-                            Ok(n) => {
-                                for i in 0..n {
-                                    serial.write_char(buffer[i] as char).void_unwrap();
-                                }
-                            },
-                            Err(e) => {
-                                pm_write!(serial, "Couldn't read file contents: {}\n", e as u8).void_unwrap();
-                                panic!("");
-                            },
+                Ok(mut vol) => {
+                    pm_write!(serial, "Trying to read ").void_unwrap();
+                    for c in FILENAME {
+                        if c != 0x0 {
+                            serial.write_char(c as char).void_unwrap();
                         }
-                    },
-                    Err(e) => {
-                        pm_write!(serial, "Couldn't read file: {}\n", e as u8).void_unwrap();
-                        panic!("");
-                    },
+                    }
+                    serial.write_char('\n').void_unwrap();
+                    match vol.open_by_name(&sdcard, &FILENAME, O_RDONLY) {
+                        Ok(mut file) => {
+                            let mut buffer = [0u8; 40];
+                            match vol.read(&sdcard, &mut file, &mut buffer) {
+                                Ok(n) => {
+                                    for i in 0..n {
+                                        serial.write_char(buffer[i] as char).void_unwrap();
+                                    }
+                                },
+                                Err(e) => {
+                                    pm_write!(serial, "Couldn't read file contents: {}\n", e as u8).void_unwrap();
+                                    panic!("");
+                                },
+                            }
+                        },
+                        Err(e) => {
+                            pm_write!(serial, "Couldn't read file: {}\n", e as u8).void_unwrap();
+                            panic!("");
+                        },
+                    }
                 },
                 Err(e) => {
                     pm_write!(serial, "Couldn't read volume: {}\n", e as u8).void_unwrap();
